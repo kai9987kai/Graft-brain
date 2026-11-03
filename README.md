@@ -1,3 +1,19 @@
+---
+license: mit
+tags:
+- connectomics
+- drosophila
+- reinforcement-learning
+- computational-neuroscience
+- embodied-ai
+- ppo
+- ring-attractor
+- central-complex
+- mushroom-body
+pipeline_tag: reinforcement-learning
+library_name: pytorch
+---
+
 # GraftBrain
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
