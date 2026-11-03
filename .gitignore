@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.tmp
+.DS_Store
+*.swp
+*.bak
+state/*.pt.[0-9]*
+data/
