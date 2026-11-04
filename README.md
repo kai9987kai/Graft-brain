@@ -6,7 +6,7 @@ tags:
 - reinforcement-learning
 - computational-neuroscience
 - embodied-ai
-- ppo
+- actor-critic
 - ring-attractor
 - central-complex
 - mushroom-body
@@ -19,14 +19,14 @@ library_name: pytorch
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Connectomics](https://img.shields.io/badge/Connectomes-FlyWire%20%7C%20Hemibrain%20%7C%20MANC%20%7C%20MaleCNS-blueviolet)](https://fly-brain-hub.vercel.app/datasets)
-[![PPO + GAE](https://img.shields.io/badge/RL-PPO%20%2B%20GAE%20%2B%20Hebbian-orange)](https://arxiv.org/abs/1707.06347)
+[![GAE actor-critic + Hebbian](https://img.shields.io/badge/RL-GAE%20actor--critic%20%2B%20Hebbian-orange)](https://arxiv.org/abs/1506.02438)
 
-**GraftBrain** integrates electron-microscopy (EM) connectome datasets from [Fly Brain Hub](https://fly-brain-hub.vercel.app/datasets), fuses them into a single multi-site cross-wired neural network, and executes the system in closed-loop interaction with a virtual 3D environment and live sensory inputs (retina raycasting and webcam feeds).
+**GraftBrain** is a CPU-local lab for cross-wired neural graphs, adaptive graft routing, and embodied learning in a virtual environment. The default graph uses **synthetic statistical proxies** for eight *Drosophila* connectome families. Actual electron-microscopy (EM) data require an explicit import; dataset names in the default viewer do not establish that those data were loaded.
 
-The network is coupled in both directions with an artificial neural network (ANN) and biologically modeled sub-circuits (Central Complex ring attractor compass, Mushroom Body sparse Kenyon Cell associative memory, and Random Network Distillation curiosity). The entire state is continuously saved with atomic rolling checkpoints and auto-resumes across runs.
+An artificial neural interface couples the graph to retina raycasting, optional webcam input, and motor actions. Simplified Central Complex compass and Mushroom Body modules accompany a Random Network Distillation curiosity signal. Atomic rolling checkpoints restore learned neural and plasticity state; world episodes restart on resume.
 
 > [!IMPORTANT]
-> **Scientific Grounding**: Connectome datasets are static anatomical wiring diagrams reconstructed from electron microscopy of preserved insect tissue. In GraftBrain, "grafting" denotes adding plastic, trainable synaptic routing layers between these biological graph representations, while "physically connected to a neural network" refers to a unified, end-to-end differentiable PyTorch computational graph. This reflects contemporary connectome-constrained computational neuroscience (e.g., *Shiu et al., Nature 2024*; *Lappalainen et al., Nature 2024*).
+> **Evidence boundary**: Grafting is an artificial computational mechanism. Adaptive support selects among fixed candidate edge records; it does not grow new anatomical endpoints. This lab does not establish biological fidelity, general task advantage, or a speedup from sparse support. Historical performance and ablation numbers in `PAPER.md` are unverified claims without supporting run artifacts.
 
 ---
 
@@ -45,7 +45,7 @@ flowchart LR
     RND["Curiosity RND<br/>(Intrinsic Exploration Bonus)"]
   end
   
-  subgraph ANN["Neural Interface & Policy (PPO)"]
+  subgraph ANN["Neural Interface & Policy (GAE Actor-Critic)"]
     ENC["Encoder (Conv2D + MLP)"]; DEC["Decoder & Value Critic"]
   end
   
@@ -68,22 +68,22 @@ flowchart LR
 ## Key Features
 
 1. **Multi-Connectome Ingestion & Provenance**
-   - Incorporates all 8 major *Drosophila* connectome datasets: **FlyWire** (FAFB v783), **Hemibrain**, **MaleCNS**, **BANC**, **Optic Lobe**, **MANC**, **FANC**, and the **Larval Brain**.
-   - Preserves neurotransmitter predictions (GABA and Glutamate mapped as inhibitory, Acetylcholine as excitatory).
-   - Supports offline statistical proxies, direct FlyWire v783 Zenodo Apache Feather imports, neuPrint REST APIs, and arbitrary CSV edge-lists.
+   - Provides synthetic proxy families named **FlyWire**, **Hemibrain**, **MaleCNS**, **BANC**, **Optic Lobe**, **MANC**, **FANC**, and **Larval Brain**.
+   - Supports explicit FlyWire v783 Apache Feather imports, neuPrint REST queries, and CSV edge lists. Source availability and annotations depend on the selected import.
+   - Uses a simplified neurotransmitter sign mapping: GABA and glutamate inhibitory, acetylcholine excitatory.
 
 2. **Multi-Site Cross-Wiring ("Grafting")**
    - Rather than routing through an arbitrary single bottleneck, every pair of connectomes is cross-wired across three distinct structural mechanisms:
      - **Anatomical Interface Sites**: Preserves natural biological flow (brain descending neurons $\to$ nerve-cord motor circuits via the "neck connective", ascending neurons $\to$ central brain, optic lobe $\to$ central visual neuropils).
      - **Homolog Sites**: Reciprocally connects neurons sharing curated cell-type identifiers across releases.
      - **Reciprocal Central Bridges**: Spatially distributed multi-locus links across central neuropils.
-   - The default configuration instantiates **177 distinct graft sites** with **~96,000 plastic graft synapses** bridging **12,000 neurons**.
+   - Candidate endpoints remain fixed after graph construction. Live telemetry distinguishes candidate records from the active support; duplicate endpoints may occur as separate records.
 
-3. **High-Performance Dynamical Rate Model (`index_add`)**
+3. **Dynamical Rate Model (`index_add`)**
    - 4 recurrent microsteps per simulation step:
      $$\mathbf{x} = \mathbf{W}_{\text{conn}} \mathbf{r} + \mathbf{W}_{\text{graft}} \mathbf{r} + \mathbf{b} + \mathbf{I}_{\text{drive}}$$
      $$\mathbf{r} \leftarrow (1 - \alpha)\mathbf{r} + \alpha \cdot \text{ReLU}(\tanh(\mathbf{x})) + \epsilon$$
-   - Employs vectorized PyTorch `index_add` operations instead of standard sparse COO/CSR matrix multiplication, delivering **>2.2x speedup** (~14 steps/s on CPU for 12,000 neurons).
+   - Uses vectorized PyTorch `index_add` operations. Throughput depends on graph size, mode, and hardware; no current comparative speedup is established.
    - Connectome weights remain frozen; graft weights adapt via online gradient descent and three-factor Hebbian plasticity.
 
 4. **Biological Sub-Circuits**
@@ -92,20 +92,21 @@ flowchart LR
    - **Homeostatic Firing Rate Regulation**: Local neuronal bias currents slowly drift to maintain population firing rates near a stable setpoint ($\bar{r} \approx 0.12$).
    - **Intrinsic Curiosity (`CuriosityRND`)**: Random Network Distillation provides exploration bonuses in sparse-reward tasks.
 
-5. **Reinforcement Learning via PPO & GAE**
-   - Proximal Policy Optimization (PPO) with clipped surrogate objective ($\epsilon = 0.2$).
-   - Generalized Advantage Estimation ($\text{GAE}(\gamma=0.98, \lambda=0.95)$) reduces variance across recurrent rollouts.
+5. **One-Pass GAE Actor-Critic & Adaptive Grafts**
+   - One optimizer pass uses Generalized Advantage Estimation ($\gamma=0.98, \lambda=0.95$), retained action log likelihoods, policy/value gradients, and entropy regularization. It performs no old-policy reevaluation or repeated optimization epochs; it is not a full PPO trainer.
+   - Optional observation-dependent site gains and budget-conserving prune/regrow change which artificial graft pathways carry activity. See the mode table below.
 
 6. **Interactive 3D Web Dashboard & Visualizer**
-   - Full Three.js 3D viewport rendered at 60 FPS in any modern web browser.
+   - Three.js 3D viewport with a separate browser render loop.
    - Live **Central Complex Polar Radar** displaying the heading direction bump.
    - Live activity raster maps across all 8 connectomes.
-   - Real-time graft site synaptic weight and signal flow monitor.
+   - Live mode, active/candidate counts, site gains, structural swaps, and masked/gated signal flow.
 
-7. **Zero-Data-Loss Continuous State Persistence**
+7. **Rolling State Persistence**
    - Atomic checkpoints every 60 seconds and on process shutdown (`state/graftbrain.pt`).
    - Rolling automated backups (`.pt.1`, `.pt.2`) with automatic corruption recovery.
    - Full event logging into append-only JSON Lines journals (`*_journal.jsonl`).
+   - Saves router parameters and optimizer, masks, coactivity, structural counters, settings, and local random generator state. It does not resume the exact world episode or outstanding autograd rollout.
 
 ---
 
@@ -116,11 +117,12 @@ flowchart LR
 * Windows, macOS, or Linux
 
 ```powershell
-# Clone or navigate to the workspace
-cd "c:\Users\kai99\Desktop\New folder (10)"
+# Clone and enter the repository
+git clone https://github.com/kai9987kai/Graft-brain.git
+cd Graft-brain
 
 # Install dependencies
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 ### Optional Dependencies
@@ -155,6 +157,46 @@ python -m graftbrain train --steps 20000 --autosave 60
 python -m graftbrain info
 ```
 
+### 5. Start an Isolated Adaptive-Graft Run
+
+```powershell
+python -m graftbrain run --fresh --graft-mode adaptive --state state/adaptive-grafts.pt
+```
+
+The compatibility default is `legacy`. Use a separate state path for a new mode; changing a saved run's mode requires `--fresh`. Resume an adaptive checkpoint with its saved settings by omitting explicit graft settings:
+
+```powershell
+python -m graftbrain run --state state/adaptive-grafts.pt
+```
+
+| Mode | Active support | Observation-dependent site gains | Structural swaps |
+|---|---|---|---|
+| `legacy` | All candidate records | Fixed at 1 | No |
+| `static` | Fixed sparse budget | Fixed at 1 | No |
+| `routing` | Fixed sparse budget | Learned | No |
+| `structural` | Sparse budget conserved per directional site bucket | Fixed at 1 | Yes |
+| `adaptive` | Sparse budget conserved per directional site bucket | Learned | Yes |
+
+The four sparse modes use the same seeded initial support. A zero-initialized linear router reads the public observation and computes a gain `2 * sigmoid(logit)` per site, held fixed across that action's recurrent microsteps. It learns through the existing actor-critic gradients, with a small mean-gain regularizer.
+
+Structural modes track detached pre/post coactivity for active and dormant candidates. After complete learning updates, they periodically replace low `abs(weight) * coactivity` active records with high-coactivity dormant records. Each `(site, source connectome, target connectome)` bucket retains its active budget. Regrown records recover their original signed initialization; affected eligibility traces, pending Hebbian updates, and Adam moments are cleared. Base connectome wiring remains frozen.
+
+Defaults are density `0.6`, interval `10` learning updates, turnover `0.1`, and warmup `2` updates. Candidate-sized tensors are still computed: this is a support constraint, with no demonstrated reduction in wall-clock time or memory. The approach draws on [RigL](https://proceedings.mlr.press/v119/evci20a.html) and [Sparse Evolutionary Training](https://www.nature.com/articles/s41467-018-04316-3); its growth score is candidate coactivity, whereas RigL uses dormant-edge gradients.
+
+### Research Controls: Gradient Recruitment and Maturation
+
+An optional gradient rule scores dormant candidates from the learning objective, before the active-mask chain rule. Dormant records still contribute no signal and receive no raw-weight gradient. Signed derivatives accumulate across the rollout; an absolute-gradient EMA updates once after backward. These are loss sensitivities, not direct causal reward attribution or guaranteed loss improvements.
+
+```powershell
+python -m graftbrain run --fresh --graft-mode adaptive --graft-growth gradient --graft-growth-init zero --graft-min-age 20 --state state/gradient-grafts.pt --port 8771
+```
+
+`--graft-growth` selects `coactivity`, `gradient`, or a private-seeded `random` control. `--graft-growth-init zero` starts regrown weights at zero; dropping old records can still change behavior. `--graft-min-age` protects each newly activated record for that many completed learning updates. If too few mature records exist, actual turnover shrinks while directional budgets stay fixed. Defaults remain `coactivity`, `original`, and `0`; old checkpoints migrate to those defaults. Resume using saved settings; changing a run's policy requires a fresh state.
+
+The viewer reports protected/mature records, finite-gradient evidence coverage, cohort gradient scales, and separate intervention counters. Coverage includes measured zero gradients, while gradient recruitment requires positive finite scores. Older running backends display unavailable diagnostics instead of inventing values. Saved-next-decision checks apply at completed learner updates under identical subsequent inputs/RNG, not arbitrary mid-rollout world continuation.
+
+Gradient recruitment adapts [RigL](https://proceedings.mlr.press/v119/evci20a.html). Minimum age and cohort measurements are engineering hypotheses informed by a [2026 preprint on growth integration](https://arxiv.org/abs/2605.15435v3), whose unit/channel experiments do not validate edge protection in this recurrent RL lab. [Module-specific sparse-RL findings](https://arxiv.org/abs/2510.12096v1) further motivate keeping adaptation confined to grafts.
+
 ---
 
 ## Environments & Cognitive Tasks
@@ -177,7 +219,7 @@ The agent is embodied as a mobile base equipped with a 2-degree-of-freedom arm (
 
 ## Real Connectome Ingestion
 
-GraftBrain can seamlessly switch from built-in statistical proxies to official, full-scale connectome releases:
+Explicit imports can replace the synthetic proxies. Imported releases are subsampled to the configured neuron budget:
 
 ### FlyWire FAFB v783 (Zenodo)
 ```powershell
@@ -212,13 +254,14 @@ python -m graftbrain run -c "csv:path/to/edges.csv@name=CustomCNS,kind=cns,annot
 ## CLI Reference
 
 ```
-usage: graftbrain [-h] {run,train,info,fetch-flywire} ...
+usage: graftbrain [-h] {run,train,info,fetch-flywire,benchmark-plasticity} ...
 
 positional arguments:
   run               Launch closed-loop simulation with live 3D web viewer
   train             Run headless accelerated training loop
   info              Inspect and summarize grafted connectome graph topology
   fetch-flywire     Download FlyWire v783 connectivity dataset (~1 GB)
+  benchmark-plasticity  Paired five-mode training and frozen-evaluation pilot
 
 options:
   -c, --connectome  Connectome specification (proxy:*, flywire:*, neuprint:*, csv:*)
@@ -232,6 +275,12 @@ options:
   --port            Web server port for 'run' command (default: 8770)
   --steps           Step limit for 'train' command (default: 10000)
   --seed            Random seed (default: 0)
+  --graft-mode      legacy, static, routing, structural, adaptive (default: legacy for new runs)
+  --graft-density   Active fraction per directional site bucket, (0, 1] (default: 0.6)
+  --graft-interval  Complete learner updates between rewiring attempts (default: 10)
+  --graft-warmup    Updates before structural adaptation (default: 2)
+  --graft-turnover  Fraction of each active bucket replaced, [0, 1] (default: 0.1)
+  --graft-router-lr Router Adam learning rate (default: 0.0001)
 ```
 
 ---
@@ -254,30 +303,50 @@ When running `python -m graftbrain run`, the dashboard at `http://127.0.0.1:8770
   * **Return Chart**: Rolling 200-episode learning curve.
   * **Success Rate**: Rolling 50-episode completion rates per task.
   * **Connectome Rasters**: Live activity heatmaps across each sub-graph.
-  * **Graft Sites Table**: Real-time traffic, synapse count, and $|w|$ across the top cross-wiring sites.
+  * **Neural Plasticity**: Saved mode, active/candidate budget, dormant count, update/rewire counters, and current site-gain spread.
+  * **Graft Sites Table**: Active/candidate edge-record counts, gain, swaps, $|w|$, and effective flow at the busiest sites. Flow includes the active mask and current gain.
+
+`/api/topology` describes candidate topology and exposes active support separately; a candidate is not necessarily an active synapse.
 
 ---
 
 ## Verification & Testing
 
-Every task includes an automated oracle controller to verify physical solvability:
+Run the discoverable regression suite for mechanism, learner, persistence, and CLI checks:
 
 ```powershell
-python tests/test_tasks.py
+python -m pip install pytest
+python -m pytest -q
 ```
 
-Expected output:
+The [adaptive-graft verification report](docs/verification-adaptive-grafts.md) records the current checks, CPU pilot artifacts, protected-state hashes, and evidence limits.
+
+The [graft-credit verification report](docs/verification-graft-credit.md) records gradient/maturation checks, the balanced RL pilot's zero observed improvement, and the bounded supervised recovery results.
+
+The [validation continuation](docs/verification-graft-continuation.md) adds behavior/trajectory diagnostics and a locally frozen17-seed supervised confirmation. It also records the longer RL study's unfavorable forage outcomes and flat go/no-go outcomes; synthetic recovery is not task-performance evidence.
+
+`tests/test_tasks.py` also contains scripted oracle probes. Oracle behavior is a separate question from policy learning; positive shaped return is not a terminal success, especially for the tracking task. Historical printed `10/10` rows alone do not establish learned capability.
+
+The `benchmark-plasticity` command compares all five modes with paired graph/training seeds, matched environment-step budgets, and held-out evaluation seeds. For a bounded default-size pilot, choose a new output directory:
+
+```powershell
+python -m graftbrain benchmark-plasticity --out runs/plasticity-pilot --train-steps 512 --tasks forage go_nogo --seeds 0 --eval-seeds 1000 1001 --max-neurons 400 --microsteps 2
 ```
-forage           oracle success 10/10
-maze             oracle success 10/10
-push             oracle success 10/10
-grasp_place      oracle success 10/10
-peg_insert       oracle success 10/10
-delayed_match    oracle success 10/10
-go_nogo          oracle success 10/10
-button_sequence  oracle success 10/10
-webcam_chase     oracle success 10/10
+
+This uses synthetic FlyWire and MANC proxies (up to 800 nodes total), with 512 training environment steps per mode/task and training seed. It writes a manifest, per-episode terminal outcomes, returns, support turnover, gain spread, and wall-clock summaries. Training episodes cut off by the step budget are recorded as nonterminal `budget_exhausted`; a positive return is not a success label. Frozen evaluation disables learning, Hebbian/RND/router/structural changes, homeostatic adaptation, and trace accumulation, resets episodic neural/compass state, and uses policy mean actions. Consult `python -m graftbrain benchmark-plasticity --help` for other settings. Small synthetic CPU pilots check the mechanism; they do not establish a general task advantage.
+
+For the new growth rules, use balanced pre/post evaluation with seven matched controls:
+
+```powershell
+python -m graftbrain benchmark-graft-credit --out runs/graft-credit-pilot --train-steps 384 --tasks forage go_nogo --seeds 0 --eval-seeds 1000 --max-neurons 400 --microsteps 1
+python -m graftbrain probe-graft-credit --out runs/graft-recovery-probe --seeds 0 1 2 --train-steps 80 --recovery-steps 80
 ```
+
+Each go/no-go evaluation anchor creates a declared go and no-go scenario before agents run. The benchmark compares coactivity, gradient and random recruitment at minimum ages 0/20, plus routing without rewiring; it holds initialization and budgets fixed. It records zero-action references, paired pre/post deltas, separate completed/truncated training returns, source hashes, library versions and structural events. Evaluation episodes are repeated measurements, not independent training seeds.
+
+The supervised probe uses a hand-declared current target switch and support replacement. It compares sham, replacement with rewiring, and replacement with rewiring disabled, preserving the trained source. Replacement can immediately help a switched target; it is not necessarily damage. Its current-error results are not RL-task or biological evidence. Both commands refuse existing output directories and retain every requested seed's outcome.
+
+Episode reports include initial/closest/final target distance, actual path length, clipped command statistics and paired changes. Command norm is dimensionless, and closer is not universally better on no-go. Probe reports include full-trajectory normalized MSE area, the last10-update mean, phase-specific pre/post edit error, and evaluation-only old-target error. The old/new labels conflict on identical inputs, so their tradeoff is not a general forgetting test.
 
 ---
 

@@ -20,6 +20,9 @@
   button:hover { border-color:var(--acc); }
   .kv { display:grid; grid-template-columns: 1fr auto; gap:2px 10px; }
   .kv span:nth-child(odd) { color:var(--dim); }
+  .note { color:var(--dim); font-size:11px; margin-top:5px; }
+  .site-kind { color:var(--dim); font-size:10px; }
+  button:disabled, select:disabled, input:disabled { opacity:.5; cursor:default; }
   .bar { height:8px; background:#1a2130; border-radius:4px; overflow:hidden; }
   .bar i { display:block; height:100%; background:var(--acc); }
   .succ { display:grid; grid-template-columns: 110px 1fr 36px; gap:4px 8px; align-items:center; }
@@ -29,6 +32,14 @@
   table { width:100%; border-collapse:collapse; font-size:11px; }
   td, th { padding:2px 4px; border-bottom:1px solid var(--line); text-align:left; }
   th { color:var(--dim); font-weight:500; }
+  .sites-table { table-layout:fixed; font-size:10px; }
+  .sites-table th:first-child { width:30%; }
+  .sites-table th:nth-child(2) { width:23%; }
+  .sites-table th:nth-child(3), .sites-table th:nth-child(4) { width:10%; }
+  .sites-table th:nth-child(5) { width:12%; }
+  .sites-table th:nth-child(6) { width:15%; }
+  .sites-table td { font-variant-numeric:tabular-nums; }
+  .sites-table td:first-child { overflow-wrap:anywhere; }
   #chart { width:100%; height:80px; background:#0e131c; border-radius:6px; }
   #cam { width:100%; border-radius:6px; border:1px solid var(--line); display:none; }
 </style>
@@ -45,6 +56,7 @@
     <button id="rst" title="Zero neural activity (keeps learned weights)">Reset activity</button>
   </div>
   <div class="row" style="margin-top:6px">speed <input id="hz" type="range" min="0" max="120" value="30"> <span id="hzv">30 Hz</span></div>
+  <div class="note" id="connection" role="status">Connecting to local simulation…</div>
 
   <h2>System</h2>
   <div class="kv" id="stats"></div>
@@ -69,8 +81,13 @@
   <h2>Connectome activity</h2>
   <div id="brains"></div>
 
-  <h2>Graft sites (busiest)</h2>
-  <table><thead><tr><th>site</th><th>kind</th><th>edges</th><th>|w|</th><th>flow</th></tr></thead><tbody id="sites"></tbody></table>
+  <h2>Neural plasticity</h2>
+  <div class="kv" id="plasticity"><span>telemetry</span><span>waiting for snapshot</span></div>
+  <div class="note">Active support changes within fixed candidate edge records. Gradient scores measure loss sensitivity, not guaranteed reward improvement. Protected connections remain active while they mature.</div>
+
+  <h2>Graft sites (highest effective flow)</h2>
+  <table class="sites-table"><thead><tr><th>site / kind</th><th title="Active edge records / candidate edge records">active / cand.</th><th>gain</th><th>swaps</th><th title="Mean absolute stored candidate weight">|w|</th><th title="Current masked and gated signal flow">flow</th></tr></thead><tbody id="sites"></tbody></table>
+  <div class="note">Candidate counts include dormant records and may include duplicate endpoints. Flow uses the current mask and site gain.</div>
 
   <h2>Webcam (local only)</h2>
   <img id="cam" alt="webcam thumbnail"><div id="camnote" style="color:var(--dim)">synthetic stimulus (start with --webcam for the live feed)</div>
@@ -82,6 +99,14 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 const TASKS = ["auto","forage","maze","push","grasp_place","peg_insert","delayed_match","go_nogo","button_sequence","webcam_chase"];
 const $ = id => document.getElementById(id);
+const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"}[ch]));
+const number = (value, places = 0) => typeof value === "number" && Number.isFinite(value)
+  ? value.toLocaleString(undefined, {minimumFractionDigits: places, maximumFractionDigits: places}) : "—";
+function renderValues(id, rows) {
+  $(id).replaceChildren(...rows.flatMap(([key, value]) => [key, value].map(text => {
+    const span = document.createElement("span"); span.textContent = text; return span;
+  })));
+}
 TASKS.forEach(t => $("task").add(new Option(t, t)));
 
 const view = $("view");
@@ -179,7 +204,7 @@ function updateWorld(w) {
   $("h-ret").textContent = w.ep_return.toFixed(2);
   $("cue").style.background = w.cue[3] ? `rgb(${w.cue.slice(0, 3).map(v => v * 255).join(",")})` : "transparent";
   $("succ").innerHTML = Object.entries(w.success).map(([t, s]) =>
-    `<span>${t}</span><div class="bar"><i style="width:${(s ?? 0) * 100}%"></i></div><span>${s == null ? "-" : Math.round(s * 100) + "%"}</span>`).join("");
+    `<span>${escapeHtml(t)}</span><div class="bar"><i style="width:${Math.max(0, Math.min(1, Number(s) || 0)) * 100}%"></i></div><span>${s == null ? "-" : Math.round(s * 100) + "%"}</span>`).join("");
 }
 
 // brain panels
@@ -248,8 +273,48 @@ function drawCompass(cmp) {
   ctx.fillStyle = "#ffcf40"; ctx.fill();
 }
 
+function updatePlasticity(summary) {
+  if (!summary) { renderValues("plasticity", [["telemetry", "unavailable in this snapshot"]]); return; }
+  const event = summary.last_event;
+  const lastUpdate = summary.last_rewire_update ?? (typeof event === "number" ? event : event?.update ?? event?.updates ?? event?.update_clock);
+  const density = summary.candidates > 0 ? 100 * summary.active / summary.candidates : 0;
+  const percent = value => Number.isFinite(value) ? `${number(value * 100, 1)}%` : "unavailable";
+  const cohort = (mean, count) => count == null ? "unavailable" : count === 0 ? "no samples"
+    : `${Number.isFinite(mean) ? mean.toExponential(2) : "unavailable"} (n=${number(count)})`;
+  renderValues("plasticity", [
+    ["mode", summary.mode ?? "—"],
+    ["growth rule / initialization", summary.growth_rule == null ? "unavailable · older runtime"
+      : `${summary.growth_rule} / ${summary.growth_init}`],
+    ["minimum active age", summary.min_age == null ? "unavailable" : `${number(summary.min_age)} updates`],
+    ["active / candidates", `${number(summary.active)} / ${number(summary.candidates)}`],
+    ["protected / mature active", summary.protected_active == null ? "unavailable"
+      : `${number(summary.protected_active)} / ${number(summary.mature_active)}`],
+    ["dormant records", number(summary.dormant)],
+    ["active density", `${number(density, 1)}%`],
+    ["learning updates", number(summary.updates)],
+    ["rewire events / swaps", `${number(summary.rewires)} / ${number(summary.swaps)}`],
+    ["last rewire update", !summary.rewires || lastUpdate == null ? "none" : number(lastUpdate)],
+    ["last event swaps / active", event?.swaps == null ? "none"
+      : `${number(event.swaps)} (${percent(summary.active > 0 ? event.swaps / summary.active : 0)})`],
+    ["last event eligible / protected", !event ? "none"
+      : `${number(event.eligible_active)} / ${number(event.protected_active)}`],
+    ["last event growth rule", event?.growth_rule ?? (event ? "not reported" : "none")],
+    ["last recruitment score", Number.isFinite(event?.selection_score_mean)
+      ? event.selection_score_mean.toExponential(2) : event?.growth_rule === "random" ? "random ranking" : "not reported"],
+    ["site gain mean / spread", `${number(summary.gate_mean, 3)} / ${number(summary.gate_spread, 3)}`],
+    ["site gain range", `${number(summary.gate_min, 3)} – ${number(summary.gate_max, 3)}`],
+    ["gradient evidence updates", number(summary.gradient_updates)],
+    ["finite gradient / dormant coverage", `${percent(summary.gradient_coverage)} / ${percent(summary.dormant_gradient_coverage)}`],
+    ["newborn gradient", cohort(summary.newborn_gradient_mean, summary.newborn_gradient_count)],
+    ["incumbent gradient", cohort(summary.incumbent_gradient_mean, summary.incumbent_gradient_count)],
+    ["invalid candidate/update entries", number(summary.gradient_nonfinite)],
+    ["support interventions / swaps", summary.interventions == null ? "unavailable"
+      : `${number(summary.interventions)} / ${number(summary.intervention_swaps)}`],
+  ]);
+}
+
 function onSnap(s) {
-  updateWorld(s.world); updateBrains(s.brain); drawCompass(s.compass);
+  updateWorld(s.world); updateBrains(s.brain); drawCompass(s.compass); updatePlasticity(s.plasticity);
   if ($("cx-angle")) $("cx-angle").textContent = `${Math.round(((s.compass?.bump ?? 0) * 180 / Math.PI + 360) % 360)}°`;
   if ($("mb-kc")) $("mb-kc").textContent = `${Math.round((s.mb?.kc_sparsity ?? 0) * 100)}%`;
   if ($("mb-mbon")) {
@@ -258,28 +323,38 @@ function onSnap(s) {
   }
   if ($("rnd-bonus")) $("rnd-bonus").textContent = (s.stats?.curiosity ?? 0).toFixed(3);
   const st = s.stats;
-  $("stats").innerHTML = [
+  renderValues("stats", [
     ["neurons", st.neurons.toLocaleString()], ["connectome edges (frozen)", st.conn_edges.toLocaleString()],
-    ["graft edges (plastic)", st.graft_edges.toLocaleString()], ["steps", st.steps.toLocaleString()],
+    ["graft candidate records", st.graft_edges.toLocaleString()], ["steps", st.steps.toLocaleString()],
     ["learning updates", st.updates], ["loss", st.loss.toFixed(3)], ["TD error (ema)", st.td.toFixed(3)],
     ["value", (st.value ?? 0).toFixed(3)], ["mean |graft w|", st.graft_w_abs.toFixed(4)],
     ["last save", Math.round(st.since_save) + " s ago"], ["status", st.paused ? "paused" : "running"],
-  ].map(([k, v]) => `<span>${k}</span><span>${v}</span>`).join("");
+  ]);
   $("pause").textContent = st.paused ? "Resume" : "Pause";
+  if (document.activeElement !== $("hz") && Number.isFinite(st.hz)) {
+    $("hz").value = st.hz; $("hzv").textContent = st.hz === 0 ? "max" : st.hz + " Hz";
+  }
   if (s.recent.length) {
     const last = s.recent[s.recent.length - 1];
     if (s.world.episode !== lastEpisodeSeen) { lastEpisodeSeen = s.world.episode; returns.push(last.ret); if (returns.length > 200) returns.shift(); drawChart(); }
   }
   const sites = [...s.sites].sort((a, b) => b.flow - a.flow).slice(0, 14);
-  $("sites").innerHTML = sites.map(x => `<tr><td>${x.from}&rarr;${x.to}</td><td title="${x.detail}">${x.kind}</td><td>${x.edges}</td><td>${x.w.toFixed(3)}</td><td>${x.flow.toFixed(4)}</td></tr>`).join("");
+  $("sites").innerHTML = sites.length ? sites.map(x => `<tr><td title="${escapeHtml(x.detail)} · site ${escapeHtml(x.id)}">${escapeHtml(x.from)}&rarr;${escapeHtml(x.to)}<div class="site-kind">${escapeHtml(x.kind)}</div></td><td>${number(x.active)} / ${number(x.candidates ?? x.edges)}</td><td>${number(x.gate, 2)}</td><td>${number(x.swaps)}</td><td>${number(x.w, 3)}</td><td>${number(x.flow, 4)}</td></tr>`).join("")
+    : '<tr><td colspan="6">No graft sites in this graph.</td></tr>';
   if (s.cam) { $("cam").src = "data:image/jpeg;base64," + s.cam; $("cam").style.display = "block"; $("camnote").style.display = "none"; }
 }
 
 let ws;
+function connectionStatus(connected) {
+  $("connection").textContent = connected ? "Connected to local simulation" : "Disconnected · reconnecting; displayed values may be stale";
+  ["task", "pause", "save", "rst", "hz"].forEach(id => { $(id).disabled = !connected; });
+}
+["task", "pause", "save", "rst", "hz"].forEach(id => { $(id).disabled = true; });
 function connect() {
-  ws = new WebSocket(`ws://${location.host}/ws`);
+  ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`);
+  ws.onopen = () => connectionStatus(true);
   ws.onmessage = e => onSnap(JSON.parse(e.data));
-  ws.onclose = () => setTimeout(connect, 1000);
+  ws.onclose = () => { connectionStatus(false); setTimeout(connect, 1000); };
 }
 connect();
 const send = o => ws?.readyState === 1 && ws.send(JSON.stringify(o));

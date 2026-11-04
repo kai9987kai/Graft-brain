@@ -82,7 +82,7 @@ class MushroomBody(nn.Module):
         self.register_buffer("kc_act", torch.zeros(n_kc))
         self.register_buffer("elig", torch.zeros(n_mbon, n_kc))
 
-    def forward(self, cue_vec: torch.Tensor) -> torch.Tensor:
+    def forward(self, cue_vec: torch.Tensor, adapt=True) -> torch.Tensor:
         """Encode sensory cue, apply top-k Winner-Take-All sparse gating, and compute MBON output."""
         # 1. Linear claw projection
         raw = F.linear(cue_vec, self.w_claw)
@@ -90,14 +90,16 @@ class MushroomBody(nn.Module):
         topk_vals, topk_idx = torch.topk(raw, self.k_sparse)
         kc = torch.zeros_like(raw)
         kc.scatter_(0, topk_idx, F.relu(topk_vals))
-        self.kc_act.copy_(kc.detach())
+        if adapt:
+            self.kc_act.copy_(kc.detach())
 
         # 3. Readout via plastic KC -> MBON weights: MBON[0] = approach, MBON[1] = avoid
         mbon_out = torch.mv(self.w_mbon, kc)
 
         # 4. Update synaptic eligibility trace for 3-factor neuromodulation
         # eligibility = post * pre
-        self.elig.mul_(0.85).add_(torch.outer(torch.tanh(mbon_out).detach(), kc.detach()))
+        if adapt:
+            self.elig.mul_(0.85).add_(torch.outer(torch.tanh(mbon_out).detach(), kc.detach()))
         return mbon_out
 
     @torch.no_grad()

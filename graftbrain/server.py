@@ -17,7 +17,11 @@ def make_app(sim):
         return web.FileResponse(os.path.join(WEB, "index.html"))
 
     async def topology(_):
-        return web.json_response(sim.graph.describe(), dumps=lambda o: json.dumps(o, default=str))
+        snapshot = sim.get_snapshot()
+        description = {**sim.graph.describe(), "edge_semantics": "candidate graft edge records",
+                       "plasticity": snapshot.get("plasticity", {}),
+                       "active_sites": snapshot.get("sites", [])}
+        return web.json_response(description, dumps=lambda o: json.dumps(o, default=str))
 
     async def ws(request):
         sock = web.WebSocketResponse(heartbeat=20)

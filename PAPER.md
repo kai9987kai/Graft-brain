@@ -8,9 +8,9 @@
 
 ## Abstract
 
-Recent breakthroughs in transmission electron microscopy (TEM) have produced high-resolution, synapse-level connectomes of the adult and larval fruit fly (*Drosophila melanogaster*), including the full female adult brain (FlyWire FAFB v783), the Janelia Hemibrain, the Male Adult Nerve Cord (MANC), the Female Adult Nerve Cord (FANC), MaleCNS, the BANC central nervous system, the optic lobe, and the complete larval nervous system. However, existing computational models treat these datasets either as isolated static topological graphs or as detached open-loop firing simulations. Here, we present **GraftBrain**, a unified, closed-loop embodied computational framework that fuses all eight primary *Drosophila* connectome datasets into a single cross-wired multi-regional network. We introduce a multi-site structural grafting methodology comprising: (1) anatomical interface sites mirroring biological connectives (descending brain pathways to motor nerve cord centers, ascending feedback, and optic-to-central projections), (2) homologous cell-type coupling preserving shared cell-type nomenclature, and (3) reciprocal distributed central bridges. 
+**GraftBrain** is a CPU-local engineering lab that couples directed neural graphs, artificial cross-graph grafts, simplified compass and Mushroom Body modules, and an embodied virtual environment. Its default graph contains synthetic statistical proxies named for eight *Drosophila* connectome families. Explicit FlyWire, neuPrint, or CSV imports are required to use reconstructed data; default proxy edges are not measured biological synapses.
 
-The unified network consists of 12,000 neurons, 252,447 frozen biological synapses, and 95,920 plastic graft synapses across 177 distinct sites. We embed this connectome within a differentiable neural architecture augmented with three bio-computational modules: a 16-wedge Central Complex (CX) ring attractor compass providing path-integrated heading representations, a sparse Kenyon Cell (KC) Mushroom Body (MB) associative circuit with dopaminergic (DAN) credit assignment, and homeostatic intrinsic plasticity regulating network stability. We optimize the system end-to-end using Proximal Policy Optimization (PPO) with Generalized Advantage Estimation (GAE) and three-factor Hebbian learning in a 3D virtual environment across nine sensorimotor, fine-motor manipulation, and cognitive memory tasks. By replacing standard sparse matrix multiplication with vectorized `index_add` operations, GraftBrain achieves full closed-loop real-time execution (~14 steps/second on consumer CPU). We demonstrate that bio-inspired ring attractor and mushroom body modules substantially accelerate goal-directed navigation and delayed associative recall, providing a foundation for scalable, embodied connectome-constrained artificial intelligence.
+This increment adds observation-dependent gains at graft sites and structural plasticity within a fixed candidate pool. A persistent mask changes active support while conserving each directional site's edge-record budget. Coactivity scores include dormant candidates, enabling prune/regrow decisions after complete learning updates. The existing learner is a one-pass actor-critic with Generalized Advantage Estimation (GAE), plus three-factor Hebbian updates; it is not a demonstrated multi-epoch PPO implementation. Five modes provide dense compatibility, fixed-support, routing-only, structural-only, and combined controls. The implementation and bounded evaluation protocol enable mechanism checks. No general task improvement, biological fidelity, sparse-compute speedup, or new sparse-training algorithm is claimed. Historical throughput and ablation figures retained below are unverified because supporting run artifacts are unavailable.
 
 ---
 
@@ -20,10 +20,10 @@ A central objective of computational neuroscience and artificial intelligence is
 
 Despite the availability of these wiring diagrams, significant computational barriers remain:
 1. **Compartmentalized Disconnection**: Public datasets exist in isolation—such as the brain-only FlyWire dataset, the ventral nerve cord (MANC/FANC) datasets, and the optic lobe connectome. In a living organism, behavior arises from continuous, bidirectional loop dynamics traversing optic neuropils, central decision centers, descending premotor tracts through the neck connective, and ascending proprioceptive feedback from the nerve cord.
-2. **Open-Loop Detachment**: The vast majority of whole-brain connectome simulations (e.g., Shiu et al., 2024) evaluate neural activity in response to artificial current pulses delivered in open-loop settings, detached from physical embodiment, environmental feedback, or closed-loop behavioral closed loops.
+2. **Closed-Loop Integration**: Coupling graph activity to sensory input and motor feedback is an engineering requirement for this lab's behavioral experiments.
 3. **Plasticity vs. Structure**: Connectome data provide a snapshot of fixed structural connectivity, but biological intelligence relies on synaptic plasticity, neuromodulation, and ongoing credit assignment.
 
-To address these challenges, we introduce **GraftBrain**, an end-to-end differentiable computational platform that bridges multi-connectome reconstructions into a functioning, embodied agent. We formulate connectome fusion as a **multi-site structural grafting problem**, introducing targeted anatomical interfaces, homologous cell-type bridges, and reciprocal central links between separate biological reconstructions. 
+GraftBrain connects proxy or imported graphs using targeted role-based interfaces, shared cell-type bridges, and reciprocal central links. These artificial grafts connect separate graphs computationally; their endpoints do not establish connections between the original biological specimens.
 
 Furthermore, we couple the grafted core with specialized biological circuits—specifically the **Central Complex (CX) ring attractor** (Seelig & Jayaraman, 2015; Hulse et al., 2021) and the **Mushroom Body (MB)** associative learning network (Aso et al., 2014)—and train the entire system closed-loop in a 3D physics environment.
 
@@ -40,27 +40,31 @@ In *Drosophila*, spatial navigation and heading estimation are computed in the c
 ### 2.3 Mushroom Body Plasticity and Neuromodulation
 Associative learning and cognitive memory in insects reside primarily in the mushroom body (Cognigni et al., 2018). High-dimensional sensory inputs from projection neurons are converted into a sparse, decorrelated representation across thousands of Kenyon Cells (KCs) via claw morphology and winner-take-all feedback inhibition (Litwin-Kumar et al., 2017). Dopaminergic neurons (DANs) compartmentalize the mushroom body lobes into distinct functional units that signal reward (e.g., PAM cluster) or punishment/aversive states (e.g., PPL1 cluster). DAN activation alters the synaptic weight between active KCs and Mushroom Body Output Neurons (MBONs), directly driving approach or avoidance behavior.
 
+### 2.4 Adaptive Sparse Connectivity
+
+Sparse Evolutionary Training (SET) evolves initially sparse artificial connectivity during learning ([Mocanu et al., 2018](https://www.nature.com/articles/s41467-018-04316-3)). RigL updates sparse support using weight magnitudes and infrequent gradient calculations ([Evci et al., 2020](https://proceedings.mlr.press/v119/evci20a.html)). GraftBrain's bounded candidate-pool extension uses pre/post coactivity to score dormant candidates, rather than RigL's dormant-edge gradient growth rule. It is an engineering extension to this lab, without a sparse-training novelty claim. Results from those prior methods do not establish results for this implementation.
+
 ---
 
 ## 3. Multi-Connectome Ingestion and Grafting Architecture
 
 ### 3.1 Mathematical Formulation of Connectome Datasets
-Each connectome dataset $k \in \{1, \dots, K\}$ is represented as a directed, signed, attributed graph:
+Each proxy or imported source $k \in \{1, \dots, K\}$ is represented as a directed, signed, attributed graph:
 $$\mathcal{G}_k = (\mathcal{V}_k, \mathcal{E}_k, \mathbf{W}_k, \mathbf{S}_k, \mathbf{T}_k, \mathbf{R}_k)$$
 where:
-* $\mathcal{V}_k$ is the set of $N_k$ reconstructed neurons.
+* $\mathcal{V}_k$ is the set of $N_k$ nodes (reconstructed neurons only when an actual dataset is imported).
 * $\mathcal{E}_k \subseteq \mathcal{V}_k \times \mathcal{V}_k$ is the set of directed synaptic connections $(i, j)$ from presynaptic neuron $i$ to postsynaptic neuron $j$.
-* $\mathbf{W}_k \in \mathbb{R}_{\ge 0}^{|\mathcal{E}_k|}$ represents synaptic weight, measured as the integer count of reconstructed electron-microscopy T-bars / polyadic synaptic contacts.
+* $\mathbf{W}_k \in \mathbb{R}_{\ge 0}^{|\mathcal{E}_k|}$ represents source edge weights. Proxy weights are synthetic; imported weights depend on the source and preprocessing.
 * $\mathbf{S}_k \in \{-1, +1\}^{|\mathcal{E}_k|}$ represents synaptic sign determined by predicted neurotransmitter identity:
   $$\mathbf{S}_k(i, j) = \begin{cases} -1 & \text{if } \text{NT}(i) \in \{\text{GABA}, \text{Glutamate}\} \\ +1 & \text{if } \text{NT}(i) \in \{\text{Acetylcholine}\} \end{cases}$$
   *(In the insect central nervous system, glutamate gates inhibitory glutamate-gated chloride channels [GluCl], acting primarily as an inhibitory neurotransmitter).*
 * $\mathbf{T}_k$ is the cell-type classification string (e.g., `E-PG`, `P-EN`, `L1-L5`, `DNp01`).
 * $\mathbf{R}_k \in \{\text{sensory}, \text{visual}, \text{central}, \text{descending}, \text{ascending}, \text{motor}\}$ denotes the macroscopic functional role.
 
-To maintain real-time computational throughput on CPU hardware, large-scale releases are sub-sampled to an active core of $N_{\text{budget}} \le 1,500$ neurons per dataset by ranking neurons according to total synaptic degree:
+To bound CPU workload, imported releases can be sub-sampled to a configured neuron budget (default $N_{\text{budget}} = 1,500$ per source) by ranking neurons according to total synaptic degree:
 $$\deg(i) = \sum_{j} \mathbf{W}(i, j) + \sum_{j} \mathbf{W}(j, i)$$
 
-The eight supported datasets integrated into the unified graph are summarized in Table 1.
+Table 1 lists the eight source families represented by the proxy names. It is background metadata, not evidence that a run imported all these releases; inspect that run's source specifications and provenance.
 
 | Dataset Name | Anatomical Region | Specimen Sex / Stage | Structural Modality | License |
 |---|---|---|---|---|
@@ -73,10 +77,10 @@ The eight supported datasets integrated into the unified graph are summarized in
 | **FANC** | Ventral Nerve Cord | Adult Female | Serial-section TEM | Custom / Academic |
 | **Larval Connectome** | Full CNS | 1st Instar Larva | Serial-section TEM | CC-BY-4.0 |
 
-*Table 1: The eight canonical Drosophila connectome datasets integrated within GraftBrain.*
+*Table 1: Drosophila connectome source families. Actual import availability and licenses must be checked for the chosen release.*
 
 ### 3.2 Multi-Site Grafting Formulation
-Let $\mathcal{V} = \bigcup_{k=1}^K \mathcal{V}_k$ denote the unified population of $N = \sum_{k=1}^K N_k$ neurons, indexed globally using index offsets $O_k = \sum_{m=1}^{k-1} N_m$. Within-connectome connections form the frozen biological base matrix $\mathbf{W}_{\text{base}}$. Between-connectome connections form the plastic synthetic graft set $\mathcal{E}_{\text{graft}}$ with trainable weights $\mathbf{W}_{\text{graft}}$.
+Let $\mathcal{V} = \bigcup_{k=1}^K \mathcal{V}_k$ denote the unified population of $N = \sum_{k=1}^K N_k$ nodes, indexed globally using index offsets $O_k = \sum_{m=1}^{k-1} N_m$. Within-source connections form the frozen base matrix $\mathbf{W}_{\text{base}}$. Between-source connections form the artificial candidate graft records $\mathcal{E}_{\text{graft}}$ with trainable weights $\mathbf{W}_{\text{graft}}$.
 
 Grafting connections are established across three distinct structural mechanisms:
 
@@ -94,16 +98,51 @@ $$\mathcal{E}_{\text{homolog}} = \{(u, v) \mid \mathbf{T}_a(u) = \mathbf{T}_b(v)
 #### 3. Distributed Reciprocal Central Bridges
 To allow distributed, non-bottlenecked cross-talk across distinct central neuropils, $K_{\text{bridge}} = 3$ independent, spatially separated clusters of central neurons ($\mathbf{R} = \text{central}$) are reciprocally cross-wired between each pair of connectomes.
 
-The total grafted graph combines $N = 12,000$ neurons, $|\mathcal{E}_{\text{base}}| = 252,447$ fixed biological edges, and $|\mathcal{E}_{\text{graft}}| = 95,920$ plastic graft edges distributed across 177 distinct anatomical and synthetic sites.
+Graph counts depend on the source specifications, seed, and budget. The runtime reports candidate edge records separately from active records. Duplicate endpoints remain separate records and are not counted as distinct anatomical synapses.
+
+### 3.3 Observation-Dependent Routing and Budgeted Structural Plasticity
+
+A linear router reads the current public observation $o_t$, without access to hidden world answers. For site $s$, its gain is
+
+$$g_s(o_t) = 2\,\operatorname{sigmoid}(A_s o_t + b_s), \qquad W^{\mathrm{eff}}_e(t) = W_e\,m_e\,g_{s(e)}(o_t).$$
+
+Router parameters start at zero, so initial gains equal one. Gains are computed once per world action and held across its recurrent microsteps. Forward dynamics, graft current, and flow telemetry use the same effective-weight rule. A separate Adam optimizer with learning rate $10^{-4}$ trains the router through the existing policy/value gradient; a $10^{-3}(\operatorname{mean}(g)-1)^2$ regularizer discourages uniform gain drift. Zero-site graphs have an empty router and finite zero diagnostics.
+
+For each nonempty bucket $b=(\text{site},\text{source graph},\text{target graph})$ containing $E_b$ candidate records, the active mask budget is
+
+$$B_b=\max(1,\min(E_b,\operatorname{round}(d E_b))), \qquad d=0.6\text{ by default}.$$
+
+A locally seeded generator selects the initial mask, shared across the four sparse control modes. Detached unmasked pre/post coactivity EMAs update once per action, including dormant records. After a two-update warmup, structural modes attempt a rewire every ten complete optimizer updates. Within each bucket they prune up to $\lfloor0.1B_b\rfloor$ low-$|W_e|\cdot\mathrm{coactivity}_e$ active records, bounded by the number of dormant records, and grow the same number of high-coactivity previously dormant records. Stable candidate indices break ties; just-pruned records cannot immediately regrow. Tiny or fully active buckets may no-op.
+
+Regrown weights recover their original candidate signed magnitudes. Pruned and regrown records have eligibility, pending Hebbian changes, and Adam moments cleared. Dormant records receive no Hebbian weight update. Structural changes occur only after backpropagation, both optimizer steps, and pending Hebbian application finish, preserving the retained rollout graph. Each directional budget is conserved and the frozen base remains unchanged.
+
+The modes are `legacy` (all candidates, unit gains), `static` (fixed sparse mask), `routing` (fixed sparse mask plus learned gains), `structural` (sparse prune/regrow, unit gains), and `adaptive` (both mechanisms). This changes active support among fixed endpoints; it does not generate arbitrary connections or model biological growth. Candidate-sized tensors remain allocated and computed, so support sparsity alone establishes neither faster execution nor lower memory use.
+
+Checkpoint state includes mask and candidate identity, bucket budgets, coactivity, structural clock, swap counters, router and optimizer state, settings, and local generator state. Restore validates candidate endpoints/sites. Legacy checkpoints retain all-active unit-gain behavior; changing a saved run's mode requires a fresh run. Resume restores neural plasticity state, not an exact world episode or outstanding autograd trajectory.
+
+```powershell
+python -m graftbrain run --fresh --graft-mode adaptive --state state/adaptive-grafts.pt
+python -m graftbrain run --state state/adaptive-grafts.pt
+```
 
 ---
+
+### 3.4 Learning-Informed Recruitment and Protected Integration Time
+
+The optional gradient policy observes upstream derivatives of the effective candidate-weight vector before propagation through the active mask. Multiplication by that action's detached site gain gives latent raw-weight sensitivity without making dormant records transmit activity. Signed derivatives sum over each retained rollout; an absolute-gradient EMA is finalized once after backward. Gradient recruitment requires positive, finite evidence. This is sensitivity to the implemented combined actor-critic objective through within-action recurrent microsteps, not direct reward attribution or cross-world-step credit.
+
+All growth policies retain the same coactivity-weight pruning utility. Regrowth can use original signed weights or zero initialization; the latter follows an aspect of [RigL](https://proceedings.mlr.press/v119/evci20a.html), while our graph, objective and pruning rule differ. Newly activated records can be protected by a minimum age in completed learner updates. Budgets remain fixed even when protection reduces actual turnover. Cohort diagnostics track recently activated versus incumbent gradient scales, finite evidence and structural events.
+
+Residency is a proposed edge-level adaptation of concerns raised by [Lillo and Cheney's October 2026 preprint](https://arxiv.org/abs/2605.15435v3), which studies growth and integration of units/channels. Its results do not establish effectiveness for our recurrent grafts. [Module-specific dynamic-sparsity findings in RL](https://arxiv.org/abs/2510.12096v1) motivate isolating the graft intervention from ANN resets. Neither source establishes a task-performance advantage here.
+
+The new benchmark compares coactivity, gradient and random recruitment at ages 0/20 against a matched no-rewiring control, with common zero initialization. Balanced frozen go/no-go scenarios, zero-action references, paired pre/post changes and independent training-seed identities prevent absolute no-go success from masquerading as learning. A separate supervised target-switch probe measures current-error changes under sham and equal-budget support replacement, with and without rewiring. Such replacement may help immediately; it is not necessarily damage. These controlled synthetic measurements and source fingerprints are engineering evidence, not biological validation.
 
 ## 4. Dynamical Rate Model and Biological Sub-Circuits
 
 ### 4.1 Vectorized Dynamical Rate Model
 Neural activation is modeled as a continuous, bounded firing-rate dynamical system evaluated over $M = 4$ microsteps per simulation time-step $\Delta t = 0.1\text{ s}$. For neuron $i \in \{1, \dots, N\}$, the total synaptic current $x_i$ and updated firing rate $r_i \in [0, 1]$ are governed by:
 
-$$x_i(t) = \sum_{j \in \mathcal{N}_{\text{base}}(i)} \mathbf{W}_{\text{base}}(j, i) r_j(t) + \sum_{k \in \mathcal{N}_{\text{graft}}(i)} \mathbf{W}_{\text{graft}}(k, i) r_k(t) + b_i + I_{\text{drive}, i}(t)$$
+$$x_i(t) = \sum_{j \in \mathcal{N}_{\text{base}}(i)} \mathbf{W}_{\text{base}}(j, i) r_j(t) + \sum_{k \in \mathcal{N}_{\text{graft}}(i)} \mathbf{W}^{\mathrm{eff}}_{\text{graft}}(k, i, t) r_k(t) + b_i + I_{\text{drive}, i}(t)$$
 
 $$r_i(t + \delta\tau) = (1 - \alpha) r_i(t) + \alpha \cdot \text{ReLU}(\tanh(x_i(t))) + \sigma \xi_i(t)$$
 
@@ -117,7 +156,7 @@ Output: Updated post-synaptic rates r' in [0, 1]^N
 
 1: x <- zeros(N)
 2: x <- x.index_add(dim=0, index=base_post, tensor=base_w * r[base_pre])
-3: x <- x.index_add(dim=0, index=graft_post, tensor=graft_w * r[graft_pre])
+3: x <- x.index_add(dim=0, index=graft_post, tensor=effective_graft_w * r[graft_pre])
 4: x <- x + b + I_drive
 5: r' <- (1 - alpha) * r + alpha * clamp(tanh(x), min=0.0)
 6: if noise > 0 then r' <- r' + noise * randn(N)
@@ -159,7 +198,7 @@ For associative memory and delayed-response cognitive tasks, we implement a mode
 ## 5. Differentiable Neural Interface and Agent Embodiment
 
 ### 5.1 Multimodal Sensory Processing
-The agent receives a heterogeneous sensory vector $\mathbf{o} \in \mathbb{R}^{146}$:
+The agent receives a heterogeneous sensory vector $\mathbf{o} \in \mathbb{R}^{155}$:
 * **Ray-Cast Retina**: 33 rays distributed over a $120^\circ$ horizontal field of view ($[-60^\circ, +60^\circ]$) with range $d_{\max} = 9.0\text{ m}$. Each ray returns 4 channels: normalized depth $1 - d/d_{\max}$ and normalized RGB surface reflectance ($33 \times 4 = 132$ dimensions).
 * **Proprioception**: 8 channels encoding arm reach ($[0.25, 0.9]\text{ m}$), arm height ($[0.0, 0.75]\text{ m}$), gripper aperture ($[0.0, 1.0]$), held object flag, linear velocity $v$, angular velocity $\omega$, and heading components $(\sin\theta, \cos\theta)$.
 * **Task Context**: One-hot task indicator vector ($\mathbb{R}^9$), cue vector ($\mathbb{R}^4$), previous reward, and normalized episode progress.
@@ -167,7 +206,7 @@ The agent receives a heterogeneous sensory vector $\mathbf{o} \in \mathbb{R}^{14
 
 ### 5.2 Sensorimotor Encoder and Decoder
 The artificial neural interface connects the external world to the biological connectome:
-* **Encoder MLP**: Maps the combined input $[\mathbf{o}, \mathbf{z}_{\text{cam}}, \mathbf{c}_{\text{compass}}, \mathbf{y}_{\text{MBON}}] \in \mathbb{R}^{200}$ through a 256-unit hidden layer to drive $N_{\text{sensory}} = 256$ designated sensory and visual neurons in the connectome.
+* **Encoder MLP**: Maps the combined input $[\mathbf{o}, \mathbf{z}_{\text{cam}}, \mathbf{c}_{\text{compass}}, \mathbf{y}_{\text{MBON}}] \in \mathbb{R}^{205}$ through a 256-unit hidden layer to drive up to $N_{\text{sensory}} = 256$ designated sensory and visual nodes.
 * **Decoder MLP**: Reads the firing rates of $N_{\text{motor}} = 128$ motor/descending neurons, $N_{\text{probe}} = 256$ distributed central probe neurons, and the 2 MBON channels to parameterize a Gaussian policy distribution $\pi_\theta(\mathbf{a} \mid \mathbf{s}) = \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\sigma})$ over 5 continuous motor actuators:
   $$\mathbf{a} = [\text{drive } v, \text{turn } \omega, \Delta\text{reach}, \Delta\text{height}, \text{grip aperture}] \in [-1, 1]^5$$
   and estimates state value $V_\phi(\mathbf{s})$.
@@ -176,25 +215,26 @@ The artificial neural interface connects the external world to the biological co
 
 ## 6. Optimization and Learning Architecture
 
-GraftBrain trains both the artificial neural interface and the plastic graft synapses $\mathbf{W}_{\text{graft}}$ through a hybrid optimization scheme combining **PPO-GAE** with **three-factor Hebbian plasticity**.
+GraftBrain trains the artificial neural interface, plastic graft weights, and enabled router using a **one-pass GAE actor-critic** plus **three-factor Hebbian plasticity**. The new mechanism uses this existing learner; replacing it with a full PPO trainer is outside this increment.
 
-### 6.1 Proximal Policy Optimization with GAE
+### 6.1 One-Pass Actor-Critic with GAE
 For a rollout trajectory of length $T = 32$, Generalized Advantage Estimation (Schulman et al., 2015) computes advantage estimates $\hat{A}_t$:
 $$\delta_t = r_t + \gamma V(s_{t+1})(1 - d_t) - V(s_t)$$
-$$\hat{A}_t = \sum_{l=0}^{T - t - 1} (\gamma \lambda)^l \delta_{t+l}$$
+$$\hat{A}_t = \delta_t + \gamma\lambda(1-d_t)\hat{A}_{t+1}$$
 where $\gamma = 0.98$ and $\lambda = 0.95$.
 
-The policy parameters and graft weights are optimized via the clipped surrogate objective:
-$$L^{\text{CLIP}}(\theta) = \hat{\mathbb{E}}_t \left[ \min\left( \rho_t(\theta)\hat{A}_t, \, \text{clip}(\rho_t(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_t \right) \right]$$
-where $\rho_t(\theta) = \frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{\text{old}}}(a_t \mid s_t)}$ with clipping threshold $\epsilon = 0.2$. The complete loss function combines policy, value, and entropy terms:
-$$L_{\text{total}}(\theta, \phi) = -L^{\text{CLIP}}(\theta) + c_1 \frac{1}{2} \text{SmoothL1}\left(V_\phi(s_t), \hat{R}_t\right) - c_2 \mathcal{H}\left(\pi_\theta(\cdot \mid s_t)\right)$$
-with value coefficient $c_1 = 0.5$ and entropy coefficient $c_2 = 0.01$. Gradients are back-propagated through the unrolled recurrent microsteps of the connectome.
+The policy loss uses the retained sampled-action log likelihoods with detached, normalized advantages:
+
+$$L_{\pi}=-\operatorname{mean}_t\big[\log\pi_\theta(a_t\mid s_t)\,\widetilde{A}_t\big],$$
+$$L_{\mathrm{total}}=L_{\pi}+0.5\operatorname{SmoothL1}(V_\phi,\widehat{R})-0.01\operatorname{mean}(\mathcal H(\pi_\theta))+L_{\mathrm{route}}.$$
+
+Gradients pass through the retained recurrent microsteps. There is one update per completed rollout and no old-policy reevaluation or repeated optimization epochs. The earlier implementation's stored likelihood ratio was identically one at its single update; describing that as effective clipped multi-epoch PPO overstated the implemented behavior. The policy gradient is now written directly. Rollout-boundary transitions and terminal reward modulation are included before the update.
 
 ### 6.2 Three-Factor Hebbian Plasticity on Graft Synapses
-In parallel with gradient descent, plastic graft synapses update continuously at every time step according to a biological three-factor Hebbian learning rule:
+In parallel with gradient descent, active graft records accumulate a simplified three-factor Hebbian update:
 $$\mathbf{E}_{\text{graft}}(t) = 0.90 \mathbf{E}_{\text{graft}}(t - 1) + \mathbf{r}_{\text{post}}(t) \odot \mathbf{r}_{\text{pre}}(t)$$
 $$\Delta \mathbf{W}_{\text{graft}} = \eta_{\text{heb}} \cdot \text{clamp}(\delta_{\text{TD}}, -2, +2) \cdot \left(\mathbf{E}_{\text{graft}} - \bar{\mathbf{E}}_{\text{graft}}\right)$$
-where $\delta_{\text{TD}}$ acts as a global broadcast neuromodulatory signal (representing volume-transmitted octopamine/dopamine).
+where $\delta_{\text{TD}}$ acts as a global broadcast modulation signal. The active mask gates eligibility and pending updates; weight changes are applied only when retained autograd graphs no longer require the previous weights. This is an artificial approximation, not a measured biological learning rule.
 
 ### 6.3 Intrinsic Curiosity Bonus (Random Network Distillation)
 To facilitate autonomous exploration in sparse-reward environments (e.g., complex mazes and object manipulation), an intrinsic reward bonus $r_{\text{int}}$ is generated using Random Network Distillation (Burda et al., 2018):
@@ -206,7 +246,7 @@ where $f$ is a fixed, randomly initialized target network, $\hat{f}_\psi$ is an 
 
 ## 7. Experimental Setup and Cognitive Benchmark Suite
 
-The agent is evaluated within a custom continuous-physics 3D simulation environment featuring planar rigid-body translation, vertical object manipulation, and ray-intersection acoustics/optics. The test suite comprises nine challenging tasks:
+The lab provides a virtual environment with planar motion, simplified object manipulation, and ray-cast vision. Its nine tasks are listed below; their presence does not establish that a trained policy solves them.
 
 ```
 +-----------------------------------------------------------------------------------------+
@@ -238,14 +278,17 @@ The agent is evaluated within a custom continuous-physics 3D simulation environm
 *Table 2: Benchmark tasks evaluating spatial, motor, and cognitive capabilities.*
 
 ### 7.1 Solvability Verification via Scripted Oracle
-To guarantee that low success rates reflect learning difficulty rather than kinematic or physical insolvability, a programmatic oracle controller was developed for each task. The oracle was evaluated over 10 random seeds per task ($N = 90$ total episodes). All 9 tasks achieved a **10/10 (100%) completion rate**, confirming physical and kinematic solvability.
+Scripted oracle probes are available separately from policy training. Earlier output printed `10/10` for nine tasks, but that script contained no assertions and treated positive tracking return as success even when the terminal outcome was `timeout`. Those historical rows therefore do not verify all-task terminal completion, and oracle performance never establishes learned policy performance.
 
 ---
 
-## 8. Empirical Results and Performance Benchmarks
+## 8. Evidence Status and Evaluation Protocol
 
-### 8.1 Computational Throughput and Kernel Vectorization
-Recurrent simulation of biological graphs with hundreds of thousands of edges is conventionally bounded by sparse matrix-vector multiplication overhead. We profiled three matrix-vector backends on an 8-thread Intel/AMD CPU executing 4 microsteps per time-step across 12,000 neurons, 252,447 connectome edges, and 95,920 graft edges.
+**The historical figures in Sections 8.1 and 8.2 are unverified.** No accompanying run artifacts establish their hardware, seeds, input graphs, task outcomes, sampling uncertainty, or measurement procedure. They are retained as historical claims for auditability, not as results supporting this implementation or the adaptive-graft capability.
+
+### 8.1 Unverified Historical Throughput Claims
+
+Earlier prose reported the following figures for a claimed 12,000-node graph with 252,447 base records, 95,920 graft records, and four microsteps. The measurements have not been reproduced here.
 
 ```
 +-----------------------------------------------------------------------------------------+
@@ -259,12 +302,13 @@ Recurrent simulation of biological graphs with hundreds of thousands of edges is
 +--------------------------------------+---------------------------+----------------------+
 ```
 
-*Table 3: Latency comparison of computational backends for combined forward and backward microsteps.*
+*Table 3: Unverified historical latency and speedup claims; no supporting run artifacts.*
 
-By implementing `index_add`, the cumulative time for 100 closed-loop environment steps (including simulation, ray-casting, PPO rollout buffer management, and autograd backward graph evaluation) dropped from **16.85 seconds** to **7.75 seconds**. This achieves an online training throughput of **~14 steps/second on CPU**, allowing consumer hardware to execute continuous closed-loop learning without requiring high-performance computing clusters.
+The same earlier text claimed 16.85 to 7.75 seconds for 100 closed-loop steps and approximately 14 steps/second on CPU. These figures do not establish a present throughput or comparative speedup. In particular, the adaptive mask still operates on candidate-sized tensors.
 
-### 8.2 Role of Biological Sub-Circuits in Task Performance
-To evaluate the contribution of the integrated biological sub-circuits, ablation experiments were conducted:
+### 8.2 Unverified Historical Ablation Claims
+
+The following percentages and convergence counts appeared in earlier prose without supporting experiment artifacts. The labels are preserved from that historical table, including its PPO terminology.
 
 ```
 +-----------------------------------------------------------------------------------------+
@@ -280,29 +324,45 @@ To evaluate the contribution of the integrated biological sub-circuits, ablation
 +------------------------------------+------------------+-----------------+---------------+
 ```
 
-*Table 4: Task completion rates and convergence speed across architectural ablations.*
+*Table 4: Unverified historical ablation percentages and convergence counts; no supporting run artifacts.*
 
-1. **Central Complex Ring Attractor**: Inclusion of the 16-wedge E-PG compass increased maze exit navigation success from 24.6% to 58.2%. The persistent heading bump acts as an internal directional memory, preventing the agent from executing repetitive circular turns in featureless corridors.
-2. **Mushroom Body Associative Memory**: Inclusion of the sparse Kenyon Cell expansion and dopaminergic MBON modulation increased delayed-match success from 34.0% to 68.7%. The sparse top-$k$ representation prevents catastrophic interference between sample cues and subsequent distractor visual stimuli during the 20-step delay period.
-3. **Homeostatic Activity Scaling**: Stabilized average network firing rates across extended runs ($>50,000$ steps), preventing the silent-extinction failure mode observed in non-homeostatic recurrent networks.
+No causal effect of the compass, Mushroom Body, curiosity, or homeostasis follows from this undocumented table. Increases in maze or delayed-match success, faster convergence, resistance to catastrophic interference, and stability beyond 50,000 steps remain unverified claims.
+
+### 8.3 Bounded Adaptive-Graft Evaluation
+
+The `benchmark-plasticity` command runs `legacy`, `static`, `routing`, `structural`, and `adaptive` with paired graph/training seeds, identical task and step budgets, and identical candidate graphs. Sparse arms share their initial mask. A saved manifest lists development and held-out evaluation seeds, configuration, and code revision/dirty status; episode records preserve returns and actual terminal outcomes. Summaries report active counts, support turnover, gain spread, and wall-clock cost.
+
+Held-out evaluation uses policy mean actions and resets episodic neural/compass state between episodes. Learning, Hebbian modulation, RND training, router updates, structural swaps, homeostatic bias adaptation, and coactivity/eligibility accumulation are frozen; firing activity may still evolve within each episode. Learned weights, router parameters, and structural support are retained. This prevents evaluation-time adaptation from being confused with frozen-policy performance.
+
+An explicit bounded pilot command is:
+
+```powershell
+python -m graftbrain benchmark-plasticity --out runs/plasticity-pilot --train-steps 512 --tasks forage go_nogo --seeds 0 --eval-seeds 1000 1001 --max-neurons 400 --microsteps 2
+```
+
+The output path must be new. These defaults use two synthetic proxies (FlyWire and MANC), 512 training environment steps per mode/task and training seed, and two held-out world seeds. Budget-truncated training episodes are nonterminal `budget_exhausted` records; evaluation outcomes use terminal success/fail/timeout labels. No adaptive-graft task-performance result is asserted in this document. Small synthetic CPU pilots support only the mechanisms and budgets actually checked, not general reliability or a task advantage.
 
 ---
 
 ## 9. Discussion and Limitations
 
 ### 9.1 Point-Neuron Abstraction vs. Biophysical Spiking
-GraftBrain models neural activation using a bounded continuous firing-rate equation rather than multi-compartmental Hodgkin-Huxley or conductance-based Leaky Integrate-and-Fire (LIF) models. While rate equations abstract away spike-timing-dependent plasticity (STDP) and dendritic branch computations, they provide two decisive advantages:
+GraftBrain models neural activation using a bounded continuous firing-rate equation rather than multi-compartmental Hodgkin-Huxley or conductance-based Leaky Integrate-and-Fire (LIF) models. Rate equations abstract away spike-timing-dependent plasticity (STDP) and dendritic branch computations. They permit:
 1. Exact differentiability, enabling gradient backpropagation through recurrent connectome dynamics using standard autograd engines.
-2. Computational efficiency, enabling closed-loop real-time simulation on commodity processors. Future extensions may integrate event-based surrogate gradient spiking layers (Neftci et al., 2019) to explore sub-millisecond temporal coincidence detection.
+2. Vectorized CPU simulation whose wall-clock cost can be measured for a specific graph and run. No universal real-time throughput is established here.
 
 ### 9.2 Biological Grafting vs. Unconstrained Synthetic Topologies
-A frequent question in neuromorphic engineering is whether constraining an artificial agent with biological connectomes offers measurable advantages over unconstrained MLPs or transformers. Our findings indicate that biological connectomes provide an inductive bias: heavy-tailed degree distributions, modular neuropil clustering, and separation of sensory, central, and motor roles create a reservoir that resists catastrophic forgetting and stabilizes recurrent dynamics.
+Whether imported connectome constraints improve an agent over unconstrained MLPs, transformers, or matched synthetic graphs remains an experimental question. Heavy-tailed degree distributions, modularity, and role separation are candidate inductive biases. The present evidence does not establish resistance to catastrophic forgetting, better recurrent stability, or an advantage from biological connectivity. Default synthetic proxies further limit any anatomical interpretation.
+
+### 9.3 Bounded Support, State, and Evaluation
+
+The router sees public observations, while structural adaptation searches only the prebuilt candidate pool. A fixed per-bucket record budget is an implementation invariant, not a measure of biological synaptic cost. Duplicate endpoints, simplified signs, artificial cross-specimen grafts, and continuous firing rates limit anatomical claims. Checkpoint restoration covers neural/plasticity state and its next decisions under identical inputs; full-world exact continuation is not provided. Five-mode paired controls and held-out episodes are necessary for comparative claims, and short synthetic pilots remain mechanism checks.
 
 ---
 
 ## 10. Conclusion
 
-We have introduced **GraftBrain**, a unified, closed-loop platform that fuses eight premier *Drosophila* connectome datasets into an embodied, learning agent. By combining multi-site structural grafting with biological circuit modules—specifically the Central Complex ring attractor compass and Mushroom Body associative learning—GraftBrain bridges the divide between static neuroanatomical reconstructions and adaptive, goal-directed behavior. Operating in real-time on consumer hardware, GraftBrain provides a scalable, open foundation for investigating connectome-constrained computation, biological spatial cognition, and biologically grounded reinforcement learning.
+GraftBrain provides a local testbed for embodied graph dynamics with artificial multi-site grafts. Observation-dependent routing and budget-conserving support adaptation extend that testbed while preserving fixed candidate endpoints and frozen base wiring. Reproducible mechanism tests and paired frozen-policy evaluation can assess the implementation. Historical undocumented figures do not establish improved learning, biological fidelity, or computational acceleration.
 
 ---
 
@@ -312,11 +372,13 @@ We have introduced **GraftBrain**, a unified, closed-loop platform that fuses ei
 * Burda, Y., Edwards, H., Storkey, A., & Klimov, O. (2018). Exploration by random network distillation. *arXiv preprint arXiv:1810.12894*.
 * Cognigni, P., Felsenberg, J., & Waddell, S. (2018). Do the right thing: neural network mechanisms of memory formation, expression and update in *Drosophila*. *Current Opinion in Neurobiology*, 52, 18–29.
 * Dorkenwald, S., et al. (2024). Neuronal wiring diagram of an adult brain. *Nature*, 634(8032), 124–138.
+* Evci, U., Gale, T., Menick, J., Castro, P. S., & Elsen, E. (2020). [Rigging the Lottery: Making All Tickets Winners](https://proceedings.mlr.press/v119/evci20a.html). *Proceedings of the 37th International Conference on Machine Learning*, PMLR 119, 2943–2952.
 * Hulse, B. K., et al. (2021). A connectome of the *Drosophila* central complex reveals network motifs suitable for flexible navigation and goal-directed behavior. *eLife*, 10, e66039.
 * Kim, S. S., Rouault, H., Druckmann, S., & Jayaraman, V. (2017). Ring attractor dynamics in the *Drosophila* central brain. *Science*, 356(6340), 849–853.
 * Lappalainen, J. K., et al. (2024). Connectome-constrained networks predict neural activity in the *Drosophila* visual system. *Nature*, 634(8032), 166–174.
 * LeCun, Y., Bengio, Y., & Hinton, G. (2015). Deep learning. *Nature*, 521(7553), 436–444.
 * Litwin-Kumar, A., Harris, K. D., Axel, R., Sompolinsky, H., & Abbott, L. F. (2017). Optimal degrees of synaptic connectivity for mushroom body function. *Neuron*, 93(5), 1153–1164.
+* Mocanu, D. C., et al. (2018). [Scalable training of artificial neural networks with adaptive sparse connectivity inspired by network science](https://www.nature.com/articles/s41467-018-04316-3). *Nature Communications*, 9, 2383.
 * Neftci, E. O., Mostafa, H., & Zenke, F. (2019). Surrogate gradient learning in spiking neural networks: Bringing the power of gradient-based optimization to neuromorphic hardware. *IEEE Signal Processing Magazine*, 36(6), 51–63.
 * Scheffer, L. K., et al. (2020). A connectome and analysis of the adult *Drosophila* central brain. *eLife*, 9, e57443.
 * Schlegel, P., et al. (2024). Whole-brain annotation and multi-connectome mapping of *Drosophila*. *Nature*, 634(8032), 139–152.

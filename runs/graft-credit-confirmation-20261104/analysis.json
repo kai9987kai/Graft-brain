@@ -1,0 +1,183 @@
+{
+  "protocol_sha256": "bf2cbd07162845f5209383358f1f0b921885402ec36c237c5b54eb044d1ace69",
+  "analysis_sha256": "2c9d1166b4c356e6a7c6c917c2bc185d5ccf48b94bbd53bc80cbc845b6b043e7",
+  "seeds": [
+    1000003,
+    1000004,
+    1000005,
+    1000006,
+    1000007,
+    1000008,
+    1000009,
+    1000010,
+    1000011,
+    1000012,
+    1000013,
+    1000014,
+    1000015,
+    1000016,
+    1000017,
+    1000018,
+    1000019
+  ],
+  "all_declared_seeds_retained": true,
+  "per_seed_paired_differences": [
+    {
+      "seed": 1000003,
+      "auc": 0.2671707031637197,
+      "tail": 0.40939529505558314,
+      "final": 0.5818383335135877
+    },
+    {
+      "seed": 1000004,
+      "auc": 0.4501138559076935,
+      "tail": 0.5184413097798825,
+      "final": 0.6972919330000877
+    },
+    {
+      "seed": 1000005,
+      "auc": 0.3064688619691878,
+      "tail": 0.3850889451801777,
+      "final": 0.5416901782155037
+    },
+    {
+      "seed": 1000006,
+      "auc": 0.4850080654956399,
+      "tail": 0.5241775572299957,
+      "final": 0.6455532014369965
+    },
+    {
+      "seed": 1000007,
+      "auc": 0.5966019376646727,
+      "tail": 0.6635730922222138,
+      "final": 0.8321322798728943
+    },
+    {
+      "seed": 1000008,
+      "auc": 0.2866766020568321,
+      "tail": 0.4060760150197893,
+      "final": 0.6166059100069106
+    },
+    {
+      "seed": 1000009,
+      "auc": 0.31101125682180286,
+      "tail": 0.4539807263296098,
+      "final": 0.6568267769180238
+    },
+    {
+      "seed": 1000010,
+      "auc": 0.22056998517364257,
+      "tail": 0.3881925363093614,
+      "final": 0.3856762945652008
+    },
+    {
+      "seed": 1000011,
+      "auc": 0.20022560288780372,
+      "tail": 0.3188280160538853,
+      "final": 0.5057600392028689
+    },
+    {
+      "seed": 1000012,
+      "auc": 0.3022102312301285,
+      "tail": 0.4426084145903587,
+      "final": 0.6280703190714121
+    },
+    {
+      "seed": 1000013,
+      "auc": 0.27106761191971607,
+      "tail": 0.30862915962934495,
+      "final": 0.4819923937320709
+    },
+    {
+      "seed": 1000014,
+      "auc": 0.44585840972140434,
+      "tail": 0.5020503163337707,
+      "final": 0.6122354865074158
+    },
+    {
+      "seed": 1000015,
+      "auc": 0.17724721953272826,
+      "tail": 0.18423254489898683,
+      "final": -0.0020845532417297363
+    },
+    {
+      "seed": 1000016,
+      "auc": 0.20533212106674903,
+      "tail": 0.30518204271793364,
+      "final": 0.24959683418273926
+    },
+    {
+      "seed": 1000017,
+      "auc": 0.07340830741450188,
+      "tail": 0.033808864653110504,
+      "final": 0.21964137256145477
+    },
+    {
+      "seed": 1000018,
+      "auc": 0.5142545539885759,
+      "tail": 0.609357263892889,
+      "final": 0.7860337272286415
+    },
+    {
+      "seed": 1000019,
+      "auc": 0.32026159996166825,
+      "tail": 0.27624172568321226,
+      "final": 0.4379127025604248
+    }
+  ],
+  "primary": {
+    "definition": "Trapezoidal current-MSE integral over recovery updates0..80, divided by80; fixed-support minus adaptive, paired within seed.",
+    "mean": 0.3196168779986157,
+    "median": 0.3022102312301285,
+    "positive": 17,
+    "zero": 0,
+    "negative": 0,
+    "bootstrap_mean_95_percent_interval": [
+      0.2579203474993547,
+      0.3844357968553101
+    ],
+    "uncertainty_scope": "95 percent percentile bootstrap for mean paired AUC difference, resampling independent confirmation seeds only; conditional on this one fixed teacher fixture"
+  },
+  "secondary": {
+    "tail": {
+      "mean": 0.39587434268118266,
+      "positive": 17,
+      "negative": 0
+    },
+    "final": {
+      "mean": 0.5221631311373237,
+      "positive": 16,
+      "negative": 1
+    }
+  },
+  "old_target_final_mean": {
+    "sham": 2.4038596994736614,
+    "disrupted_rewire": 2.4315990139456356,
+    "disrupted_no_rewire": 1.977942186243394
+  },
+  "recovery_edit_observations": {
+    "sham": {
+      "events": 136,
+      "error_increasing": 72,
+      "error_decreasing": 64,
+      "max_error_increase": 0.6827632486820221
+    },
+    "disrupted_rewire": {
+      "events": 136,
+      "error_increasing": 75,
+      "error_decreasing": 61,
+      "max_error_increase": 0.61836738884449
+    },
+    "disrupted_no_rewire": {
+      "events": 0,
+      "error_increasing": 0,
+      "error_decreasing": 0,
+      "max_error_increase": 0
+    }
+  },
+  "limits": [
+    "The confirmation varies initialization, minibatches and support randomness within the same hand-declared teacher/candidate graph.",
+    "It does not establish RL task advantage, biological fidelity, retention, robustness on other shifts, or superiority over other growth policies.",
+    "The teacher switch reassigns different targets to the same inputs, so old/new target errors express a necessary tradeoff, not a general catastrophic-forgetting test."
+  ]
+}

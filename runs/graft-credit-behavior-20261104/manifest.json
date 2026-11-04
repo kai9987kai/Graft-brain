@@ -1,0 +1,1213 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "source_sha256": {
+    "graftbrain/__init__.py": "5ee3a04201ca2b6d4744fed6aae0be2e2c528a5431ad23d42f556eb651648955",
+    "graftbrain/__main__.py": "541080c747ecd1db6e55240c866f80c1b90068dbe0c8870190d653da15f467a3",
+    "graftbrain/brain.py": "ce5e973e93fae26906770e3c6fac66d993cc96af1c4239c5b1ec34a0dc37fa75",
+    "graftbrain/connectomes.py": "329af282fafd26b0d0444291f4e53beae198d6f28f2bdfeb8eea6a62e73de3c1",
+    "graftbrain/credit_experiments.py": "115ad1a45a1c457f7b42ef1daca93b2fd1c6d7840454cef223b8871cc7624dc3",
+    "graftbrain/experiments.py": "d26492305d44a6347b768e3109f6d5d0ee732126ffe69a119e81ba163eaa6345",
+    "graftbrain/graft.py": "8663492e63645cd88669503c1c7a1ec051be2d736fe416c8f9d7128617e5df85",
+    "graftbrain/graft_probe.py": "987dfd4f49c356b4431481efea7210fd6bf72f87cdb905df36da3030580b6512",
+    "graftbrain/neuro_modules.py": "d1237a929a9710ade3f7b7afd235bcea48d443a89f27c28617d89ad971466fb6",
+    "graftbrain/plasticity.py": "c26184bd8d38670aa7ef1011289a4e9c3f4309cc8f7e8670ec6ae9307c006167",
+    "graftbrain/runtime.py": "a3164a7ca79068a05474c11e324fd962297f644cf859a2adf398e50a2a009ba2",
+    "graftbrain/senses.py": "f9e7fe65b41e5dda9f30f036f647b82f913c42ce5c87c52c315a2dd6291e6221",
+    "graftbrain/server.py": "c706166d831ad0f12c35b5cd57b2c45fb984df14cf16f04129ad9cb4c0776dca",
+    "graftbrain/world.py": "720a6a026e593adf37c280d1a3dffafa185899119f3eaf0f2a41cd478e833bf3"
+  },
+  "versions": {
+    "python": "3.12.10",
+    "torch": "2.11.0+cpu",
+    "numpy": "2.4.3",
+    "graftbrain": "0.1.0"
+  },
+  "platform": "Windows-11-10.0.28120-SP0",
+  "training_seeds": [
+    0
+  ],
+  "evaluation_seeds": [
+    1000
+  ],
+  "config": {
+    "specs": [
+      "proxy:flywire",
+      "proxy:manc"
+    ],
+    "max_neurons": 400,
+    "train_steps": 640,
+    "tasks": [
+      "forage",
+      "go_nogo"
+    ],
+    "microsteps": 1,
+    "rollout": 16,
+    "torch_threads": 1,
+    "arms": [
+      {
+        "arm": "coactivity_age0",
+        "growth_rule": "coactivity",
+        "min_age": 0,
+        "rewiring_enabled": true
+      },
+      {
+        "arm": "coactivity_age20",
+        "growth_rule": "coactivity",
+        "min_age": 20,
+        "rewiring_enabled": true
+      },
+      {
+        "arm": "gradient_age0",
+        "growth_rule": "gradient",
+        "min_age": 0,
+        "rewiring_enabled": true
+      },
+      {
+        "arm": "gradient_age20",
+        "growth_rule": "gradient",
+        "min_age": 20,
+        "rewiring_enabled": true
+      },
+      {
+        "arm": "random_age0",
+        "growth_rule": "random",
+        "min_age": 0,
+        "rewiring_enabled": true
+      },
+      {
+        "arm": "random_age20",
+        "growth_rule": "random",
+        "min_age": 20,
+        "rewiring_enabled": true
+      },
+      {
+        "arm": "routing_only",
+        "growth_rule": "coactivity",
+        "min_age": 0,
+        "rewiring_enabled": false
+      }
+    ]
+  },
+  "scenarios": [
+    {
+      "scenario_id": "forage:1000:forage",
+      "task": "forage",
+      "requested_seed": 1000,
+      "world_seed": 1000,
+      "condition": "forage"
+    },
+    {
+      "scenario_id": "go_nogo:1000:go",
+      "task": "go_nogo",
+      "requested_seed": 1000,
+      "world_seed": 1002,
+      "condition": "go"
+    },
+    {
+      "scenario_id": "go_nogo:1000:nogo",
+      "task": "go_nogo",
+      "requested_seed": 1000,
+      "world_seed": 1000,
+      "condition": "nogo"
+    }
+  ],
+  "behavior_metrics": {
+    "reporter_only": true,
+    "fields": [
+      "initial_target_distance",
+      "min_target_distance",
+      "final_target_distance",
+      "path_length",
+      "mean_abs_drive",
+      "mean_abs_turn",
+      "mean_squared_action_norm",
+      "action_saturation_fraction"
+    ],
+    "target": "forage: world.st.goal; go_nogo: world.st.orb; never supplied to the agent",
+    "distance_and_path_units": "world units",
+    "path_length": "sum of actual planar displacement after each World.step, including collisions",
+    "mean_squared_action_norm": "mean per-step sum of squared commands after World action clipping; dimensionless, not mechanical work",
+    "action_saturation_fraction": "fraction of executed command coordinates with absolute value 1",
+    "interpretation": "Signed post-minus-pre descriptive changes; closer is not universally better, especially for no-go"
+  },
+  "evaluation": {
+    "actions": "policy_mean",
+    "learning": false,
+    "state": "independent saved-state clone, reset episode per scenario",
+    "noise": "private per-scenario torch stream seeded with actual world_seed",
+    "camera": "fresh deterministic synthetic stream per scenario",
+    "selection": "ascending uint64 world-seed scan (wrap at maximum) by initial go/nogo condition; excludes training seeds; never reward-based",
+    "zero_action_reference": true
+  },
+  "evidence_limit": "Bounded synthetic/proxy CPU pilot; no general task benefit, biological fidelity, novelty, or physical reliability claim.",
+  "arms": [
+    {
+      "arm": "coactivity_age0",
+      "growth_rule": "coactivity",
+      "min_age": 0,
+      "rewiring_enabled": true,
+      "task": "forage",
+      "seed": 0,
+      "plasticity_config": {
+        "mode": "adaptive",
+        "density": 0.6,
+        "interval": 10,
+        "warmup": 2,
+        "turnover": 0.1,
+        "router_lr": 0.0001,
+        "growth_rule": "coactivity",
+        "growth_init": "zero",
+        "min_age": 0
+      },
+      "agent_config": {
+        "rollout": 16,
+        "gamma": 0.98,
+        "gae_lambda": 0.95,
+        "ppo_clip": 0.2,
+        "microsteps": 1,
+        "optimizer_groups": [
+          {
+            "lr": 0.0003,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          },
+          {
+            "lr": 8.999999999999999e-05,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          }
+        ]
+      },
+      "graph_digest": "d068897508bfc393e113b8f82720f38932f09e5e300a5021a26c3e84b8514cf1",
+      "initial_support_digest": "d71c5f8b59ccaa7295ba7af40f422d7ac1d759fc39578baf94e6856d7510c3c3",
+      "initial_model_digest": "d54e520404379e5e5e2c6ec370fd069f4a8f83113bcc1d46a1ba0d1efa939d53",
+      "bucket_budgets": [
+        86,
+        103,
+        86,
+        86,
+        86,
+        86,
+        86,
+        86,
+        144,
+        103
+      ]
+    },
+    {
+      "arm": "coactivity_age20",
+      "growth_rule": "coactivity",
+      "min_age": 20,
+      "rewiring_enabled": true,
+      "task": "forage",
+      "seed": 0,
+      "plasticity_config": {
+        "mode": "adaptive",
+        "density": 0.6,
+        "interval": 10,
+        "warmup": 2,
+        "turnover": 0.1,
+        "router_lr": 0.0001,
+        "growth_rule": "coactivity",
+        "growth_init": "zero",
+        "min_age": 20
+      },
+      "agent_config": {
+        "rollout": 16,
+        "gamma": 0.98,
+        "gae_lambda": 0.95,
+        "ppo_clip": 0.2,
+        "microsteps": 1,
+        "optimizer_groups": [
+          {
+            "lr": 0.0003,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          },
+          {
+            "lr": 8.999999999999999e-05,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          }
+        ]
+      },
+      "graph_digest": "d068897508bfc393e113b8f82720f38932f09e5e300a5021a26c3e84b8514cf1",
+      "initial_support_digest": "d71c5f8b59ccaa7295ba7af40f422d7ac1d759fc39578baf94e6856d7510c3c3",
+      "initial_model_digest": "d54e520404379e5e5e2c6ec370fd069f4a8f83113bcc1d46a1ba0d1efa939d53",
+      "bucket_budgets": [
+        86,
+        103,
+        86,
+        86,
+        86,
+        86,
+        86,
+        86,
+        144,
+        103
+      ]
+    },
+    {
+      "arm": "gradient_age0",
+      "growth_rule": "gradient",
+      "min_age": 0,
+      "rewiring_enabled": true,
+      "task": "forage",
+      "seed": 0,
+      "plasticity_config": {
+        "mode": "adaptive",
+        "density": 0.6,
+        "interval": 10,
+        "warmup": 2,
+        "turnover": 0.1,
+        "router_lr": 0.0001,
+        "growth_rule": "gradient",
+        "growth_init": "zero",
+        "min_age": 0
+      },
+      "agent_config": {
+        "rollout": 16,
+        "gamma": 0.98,
+        "gae_lambda": 0.95,
+        "ppo_clip": 0.2,
+        "microsteps": 1,
+        "optimizer_groups": [
+          {
+            "lr": 0.0003,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          },
+          {
+            "lr": 8.999999999999999e-05,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          }
+        ]
+      },
+      "graph_digest": "d068897508bfc393e113b8f82720f38932f09e5e300a5021a26c3e84b8514cf1",
+      "initial_support_digest": "d71c5f8b59ccaa7295ba7af40f422d7ac1d759fc39578baf94e6856d7510c3c3",
+      "initial_model_digest": "d54e520404379e5e5e2c6ec370fd069f4a8f83113bcc1d46a1ba0d1efa939d53",
+      "bucket_budgets": [
+        86,
+        103,
+        86,
+        86,
+        86,
+        86,
+        86,
+        86,
+        144,
+        103
+      ]
+    },
+    {
+      "arm": "gradient_age20",
+      "growth_rule": "gradient",
+      "min_age": 20,
+      "rewiring_enabled": true,
+      "task": "forage",
+      "seed": 0,
+      "plasticity_config": {
+        "mode": "adaptive",
+        "density": 0.6,
+        "interval": 10,
+        "warmup": 2,
+        "turnover": 0.1,
+        "router_lr": 0.0001,
+        "growth_rule": "gradient",
+        "growth_init": "zero",
+        "min_age": 20
+      },
+      "agent_config": {
+        "rollout": 16,
+        "gamma": 0.98,
+        "gae_lambda": 0.95,
+        "ppo_clip": 0.2,
+        "microsteps": 1,
+        "optimizer_groups": [
+          {
+            "lr": 0.0003,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          },
+          {
+            "lr": 8.999999999999999e-05,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          }
+        ]
+      },
+      "graph_digest": "d068897508bfc393e113b8f82720f38932f09e5e300a5021a26c3e84b8514cf1",
+      "initial_support_digest": "d71c5f8b59ccaa7295ba7af40f422d7ac1d759fc39578baf94e6856d7510c3c3",
+      "initial_model_digest": "d54e520404379e5e5e2c6ec370fd069f4a8f83113bcc1d46a1ba0d1efa939d53",
+      "bucket_budgets": [
+        86,
+        103,
+        86,
+        86,
+        86,
+        86,
+        86,
+        86,
+        144,
+        103
+      ]
+    },
+    {
+      "arm": "random_age0",
+      "growth_rule": "random",
+      "min_age": 0,
+      "rewiring_enabled": true,
+      "task": "forage",
+      "seed": 0,
+      "plasticity_config": {
+        "mode": "adaptive",
+        "density": 0.6,
+        "interval": 10,
+        "warmup": 2,
+        "turnover": 0.1,
+        "router_lr": 0.0001,
+        "growth_rule": "random",
+        "growth_init": "zero",
+        "min_age": 0
+      },
+      "agent_config": {
+        "rollout": 16,
+        "gamma": 0.98,
+        "gae_lambda": 0.95,
+        "ppo_clip": 0.2,
+        "microsteps": 1,
+        "optimizer_groups": [
+          {
+            "lr": 0.0003,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          },
+          {
+            "lr": 8.999999999999999e-05,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          }
+        ]
+      },
+      "graph_digest": "d068897508bfc393e113b8f82720f38932f09e5e300a5021a26c3e84b8514cf1",
+      "initial_support_digest": "d71c5f8b59ccaa7295ba7af40f422d7ac1d759fc39578baf94e6856d7510c3c3",
+      "initial_model_digest": "d54e520404379e5e5e2c6ec370fd069f4a8f83113bcc1d46a1ba0d1efa939d53",
+      "bucket_budgets": [
+        86,
+        103,
+        86,
+        86,
+        86,
+        86,
+        86,
+        86,
+        144,
+        103
+      ]
+    },
+    {
+      "arm": "random_age20",
+      "growth_rule": "random",
+      "min_age": 20,
+      "rewiring_enabled": true,
+      "task": "forage",
+      "seed": 0,
+      "plasticity_config": {
+        "mode": "adaptive",
+        "density": 0.6,
+        "interval": 10,
+        "warmup": 2,
+        "turnover": 0.1,
+        "router_lr": 0.0001,
+        "growth_rule": "random",
+        "growth_init": "zero",
+        "min_age": 20
+      },
+      "agent_config": {
+        "rollout": 16,
+        "gamma": 0.98,
+        "gae_lambda": 0.95,
+        "ppo_clip": 0.2,
+        "microsteps": 1,
+        "optimizer_groups": [
+          {
+            "lr": 0.0003,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          },
+          {
+            "lr": 8.999999999999999e-05,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          }
+        ]
+      },
+      "graph_digest": "d068897508bfc393e113b8f82720f38932f09e5e300a5021a26c3e84b8514cf1",
+      "initial_support_digest": "d71c5f8b59ccaa7295ba7af40f422d7ac1d759fc39578baf94e6856d7510c3c3",
+      "initial_model_digest": "d54e520404379e5e5e2c6ec370fd069f4a8f83113bcc1d46a1ba0d1efa939d53",
+      "bucket_budgets": [
+        86,
+        103,
+        86,
+        86,
+        86,
+        86,
+        86,
+        86,
+        144,
+        103
+      ]
+    },
+    {
+      "arm": "routing_only",
+      "growth_rule": "coactivity",
+      "min_age": 0,
+      "rewiring_enabled": false,
+      "task": "forage",
+      "seed": 0,
+      "plasticity_config": {
+        "mode": "adaptive",
+        "density": 0.6,
+        "interval": 10,
+        "warmup": 2,
+        "turnover": 0.1,
+        "router_lr": 0.0001,
+        "growth_rule": "coactivity",
+        "growth_init": "zero",
+        "min_age": 0
+      },
+      "agent_config": {
+        "rollout": 16,
+        "gamma": 0.98,
+        "gae_lambda": 0.95,
+        "ppo_clip": 0.2,
+        "microsteps": 1,
+        "optimizer_groups": [
+          {
+            "lr": 0.0003,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          },
+          {
+            "lr": 8.999999999999999e-05,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          }
+        ]
+      },
+      "graph_digest": "d068897508bfc393e113b8f82720f38932f09e5e300a5021a26c3e84b8514cf1",
+      "initial_support_digest": "d71c5f8b59ccaa7295ba7af40f422d7ac1d759fc39578baf94e6856d7510c3c3",
+      "initial_model_digest": "d54e520404379e5e5e2c6ec370fd069f4a8f83113bcc1d46a1ba0d1efa939d53",
+      "bucket_budgets": [
+        86,
+        103,
+        86,
+        86,
+        86,
+        86,
+        86,
+        86,
+        144,
+        103
+      ]
+    },
+    {
+      "arm": "coactivity_age0",
+      "growth_rule": "coactivity",
+      "min_age": 0,
+      "rewiring_enabled": true,
+      "task": "go_nogo",
+      "seed": 0,
+      "plasticity_config": {
+        "mode": "adaptive",
+        "density": 0.6,
+        "interval": 10,
+        "warmup": 2,
+        "turnover": 0.1,
+        "router_lr": 0.0001,
+        "growth_rule": "coactivity",
+        "growth_init": "zero",
+        "min_age": 0
+      },
+      "agent_config": {
+        "rollout": 16,
+        "gamma": 0.98,
+        "gae_lambda": 0.95,
+        "ppo_clip": 0.2,
+        "microsteps": 1,
+        "optimizer_groups": [
+          {
+            "lr": 0.0003,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          },
+          {
+            "lr": 8.999999999999999e-05,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          }
+        ]
+      },
+      "graph_digest": "d068897508bfc393e113b8f82720f38932f09e5e300a5021a26c3e84b8514cf1",
+      "initial_support_digest": "d71c5f8b59ccaa7295ba7af40f422d7ac1d759fc39578baf94e6856d7510c3c3",
+      "initial_model_digest": "d54e520404379e5e5e2c6ec370fd069f4a8f83113bcc1d46a1ba0d1efa939d53",
+      "bucket_budgets": [
+        86,
+        103,
+        86,
+        86,
+        86,
+        86,
+        86,
+        86,
+        144,
+        103
+      ]
+    },
+    {
+      "arm": "coactivity_age20",
+      "growth_rule": "coactivity",
+      "min_age": 20,
+      "rewiring_enabled": true,
+      "task": "go_nogo",
+      "seed": 0,
+      "plasticity_config": {
+        "mode": "adaptive",
+        "density": 0.6,
+        "interval": 10,
+        "warmup": 2,
+        "turnover": 0.1,
+        "router_lr": 0.0001,
+        "growth_rule": "coactivity",
+        "growth_init": "zero",
+        "min_age": 20
+      },
+      "agent_config": {
+        "rollout": 16,
+        "gamma": 0.98,
+        "gae_lambda": 0.95,
+        "ppo_clip": 0.2,
+        "microsteps": 1,
+        "optimizer_groups": [
+          {
+            "lr": 0.0003,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          },
+          {
+            "lr": 8.999999999999999e-05,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          }
+        ]
+      },
+      "graph_digest": "d068897508bfc393e113b8f82720f38932f09e5e300a5021a26c3e84b8514cf1",
+      "initial_support_digest": "d71c5f8b59ccaa7295ba7af40f422d7ac1d759fc39578baf94e6856d7510c3c3",
+      "initial_model_digest": "d54e520404379e5e5e2c6ec370fd069f4a8f83113bcc1d46a1ba0d1efa939d53",
+      "bucket_budgets": [
+        86,
+        103,
+        86,
+        86,
+        86,
+        86,
+        86,
+        86,
+        144,
+        103
+      ]
+    },
+    {
+      "arm": "gradient_age0",
+      "growth_rule": "gradient",
+      "min_age": 0,
+      "rewiring_enabled": true,
+      "task": "go_nogo",
+      "seed": 0,
+      "plasticity_config": {
+        "mode": "adaptive",
+        "density": 0.6,
+        "interval": 10,
+        "warmup": 2,
+        "turnover": 0.1,
+        "router_lr": 0.0001,
+        "growth_rule": "gradient",
+        "growth_init": "zero",
+        "min_age": 0
+      },
+      "agent_config": {
+        "rollout": 16,
+        "gamma": 0.98,
+        "gae_lambda": 0.95,
+        "ppo_clip": 0.2,
+        "microsteps": 1,
+        "optimizer_groups": [
+          {
+            "lr": 0.0003,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          },
+          {
+            "lr": 8.999999999999999e-05,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          }
+        ]
+      },
+      "graph_digest": "d068897508bfc393e113b8f82720f38932f09e5e300a5021a26c3e84b8514cf1",
+      "initial_support_digest": "d71c5f8b59ccaa7295ba7af40f422d7ac1d759fc39578baf94e6856d7510c3c3",
+      "initial_model_digest": "d54e520404379e5e5e2c6ec370fd069f4a8f83113bcc1d46a1ba0d1efa939d53",
+      "bucket_budgets": [
+        86,
+        103,
+        86,
+        86,
+        86,
+        86,
+        86,
+        86,
+        144,
+        103
+      ]
+    },
+    {
+      "arm": "gradient_age20",
+      "growth_rule": "gradient",
+      "min_age": 20,
+      "rewiring_enabled": true,
+      "task": "go_nogo",
+      "seed": 0,
+      "plasticity_config": {
+        "mode": "adaptive",
+        "density": 0.6,
+        "interval": 10,
+        "warmup": 2,
+        "turnover": 0.1,
+        "router_lr": 0.0001,
+        "growth_rule": "gradient",
+        "growth_init": "zero",
+        "min_age": 20
+      },
+      "agent_config": {
+        "rollout": 16,
+        "gamma": 0.98,
+        "gae_lambda": 0.95,
+        "ppo_clip": 0.2,
+        "microsteps": 1,
+        "optimizer_groups": [
+          {
+            "lr": 0.0003,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          },
+          {
+            "lr": 8.999999999999999e-05,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          }
+        ]
+      },
+      "graph_digest": "d068897508bfc393e113b8f82720f38932f09e5e300a5021a26c3e84b8514cf1",
+      "initial_support_digest": "d71c5f8b59ccaa7295ba7af40f422d7ac1d759fc39578baf94e6856d7510c3c3",
+      "initial_model_digest": "d54e520404379e5e5e2c6ec370fd069f4a8f83113bcc1d46a1ba0d1efa939d53",
+      "bucket_budgets": [
+        86,
+        103,
+        86,
+        86,
+        86,
+        86,
+        86,
+        86,
+        144,
+        103
+      ]
+    },
+    {
+      "arm": "random_age0",
+      "growth_rule": "random",
+      "min_age": 0,
+      "rewiring_enabled": true,
+      "task": "go_nogo",
+      "seed": 0,
+      "plasticity_config": {
+        "mode": "adaptive",
+        "density": 0.6,
+        "interval": 10,
+        "warmup": 2,
+        "turnover": 0.1,
+        "router_lr": 0.0001,
+        "growth_rule": "random",
+        "growth_init": "zero",
+        "min_age": 0
+      },
+      "agent_config": {
+        "rollout": 16,
+        "gamma": 0.98,
+        "gae_lambda": 0.95,
+        "ppo_clip": 0.2,
+        "microsteps": 1,
+        "optimizer_groups": [
+          {
+            "lr": 0.0003,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          },
+          {
+            "lr": 8.999999999999999e-05,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          }
+        ]
+      },
+      "graph_digest": "d068897508bfc393e113b8f82720f38932f09e5e300a5021a26c3e84b8514cf1",
+      "initial_support_digest": "d71c5f8b59ccaa7295ba7af40f422d7ac1d759fc39578baf94e6856d7510c3c3",
+      "initial_model_digest": "d54e520404379e5e5e2c6ec370fd069f4a8f83113bcc1d46a1ba0d1efa939d53",
+      "bucket_budgets": [
+        86,
+        103,
+        86,
+        86,
+        86,
+        86,
+        86,
+        86,
+        144,
+        103
+      ]
+    },
+    {
+      "arm": "random_age20",
+      "growth_rule": "random",
+      "min_age": 20,
+      "rewiring_enabled": true,
+      "task": "go_nogo",
+      "seed": 0,
+      "plasticity_config": {
+        "mode": "adaptive",
+        "density": 0.6,
+        "interval": 10,
+        "warmup": 2,
+        "turnover": 0.1,
+        "router_lr": 0.0001,
+        "growth_rule": "random",
+        "growth_init": "zero",
+        "min_age": 20
+      },
+      "agent_config": {
+        "rollout": 16,
+        "gamma": 0.98,
+        "gae_lambda": 0.95,
+        "ppo_clip": 0.2,
+        "microsteps": 1,
+        "optimizer_groups": [
+          {
+            "lr": 0.0003,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          },
+          {
+            "lr": 8.999999999999999e-05,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          }
+        ]
+      },
+      "graph_digest": "d068897508bfc393e113b8f82720f38932f09e5e300a5021a26c3e84b8514cf1",
+      "initial_support_digest": "d71c5f8b59ccaa7295ba7af40f422d7ac1d759fc39578baf94e6856d7510c3c3",
+      "initial_model_digest": "d54e520404379e5e5e2c6ec370fd069f4a8f83113bcc1d46a1ba0d1efa939d53",
+      "bucket_budgets": [
+        86,
+        103,
+        86,
+        86,
+        86,
+        86,
+        86,
+        86,
+        144,
+        103
+      ]
+    },
+    {
+      "arm": "routing_only",
+      "growth_rule": "coactivity",
+      "min_age": 0,
+      "rewiring_enabled": false,
+      "task": "go_nogo",
+      "seed": 0,
+      "plasticity_config": {
+        "mode": "adaptive",
+        "density": 0.6,
+        "interval": 10,
+        "warmup": 2,
+        "turnover": 0.1,
+        "router_lr": 0.0001,
+        "growth_rule": "coactivity",
+        "growth_init": "zero",
+        "min_age": 0
+      },
+      "agent_config": {
+        "rollout": 16,
+        "gamma": 0.98,
+        "gae_lambda": 0.95,
+        "ppo_clip": 0.2,
+        "microsteps": 1,
+        "optimizer_groups": [
+          {
+            "lr": 0.0003,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          },
+          {
+            "lr": 8.999999999999999e-05,
+            "betas": [
+              0.9,
+              0.999
+            ],
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": false,
+            "maximize": false,
+            "foreach": null,
+            "capturable": false,
+            "differentiable": false,
+            "fused": null,
+            "decoupled_weight_decay": false
+          }
+        ]
+      },
+      "graph_digest": "d068897508bfc393e113b8f82720f38932f09e5e300a5021a26c3e84b8514cf1",
+      "initial_support_digest": "d71c5f8b59ccaa7295ba7af40f422d7ac1d759fc39578baf94e6856d7510c3c3",
+      "initial_model_digest": "d54e520404379e5e5e2c6ec370fd069f4a8f83113bcc1d46a1ba0d1efa939d53",
+      "bucket_budgets": [
+        86,
+        103,
+        86,
+        86,
+        86,
+        86,
+        86,
+        86,
+        144,
+        103
+      ]
+    }
+  ],
+  "source_sha256_end": {
+    "graftbrain/__init__.py": "5ee3a04201ca2b6d4744fed6aae0be2e2c528a5431ad23d42f556eb651648955",
+    "graftbrain/__main__.py": "541080c747ecd1db6e55240c866f80c1b90068dbe0c8870190d653da15f467a3",
+    "graftbrain/brain.py": "ce5e973e93fae26906770e3c6fac66d993cc96af1c4239c5b1ec34a0dc37fa75",
+    "graftbrain/connectomes.py": "329af282fafd26b0d0444291f4e53beae198d6f28f2bdfeb8eea6a62e73de3c1",
+    "graftbrain/credit_experiments.py": "115ad1a45a1c457f7b42ef1daca93b2fd1c6d7840454cef223b8871cc7624dc3",
+    "graftbrain/experiments.py": "d26492305d44a6347b768e3109f6d5d0ee732126ffe69a119e81ba163eaa6345",
+    "graftbrain/graft.py": "8663492e63645cd88669503c1c7a1ec051be2d736fe416c8f9d7128617e5df85",
+    "graftbrain/graft_probe.py": "987dfd4f49c356b4431481efea7210fd6bf72f87cdb905df36da3030580b6512",
+    "graftbrain/neuro_modules.py": "d1237a929a9710ade3f7b7afd235bcea48d443a89f27c28617d89ad971466fb6",
+    "graftbrain/plasticity.py": "c26184bd8d38670aa7ef1011289a4e9c3f4309cc8f7e8670ec6ae9307c006167",
+    "graftbrain/runtime.py": "a3164a7ca79068a05474c11e324fd962297f644cf859a2adf398e50a2a009ba2",
+    "graftbrain/senses.py": "f9e7fe65b41e5dda9f30f036f647b82f913c42ce5c87c52c315a2dd6291e6221",
+    "graftbrain/server.py": "c706166d831ad0f12c35b5cd57b2c45fb984df14cf16f04129ad9cb4c0776dca",
+    "graftbrain/world.py": "720a6a026e593adf37c280d1a3dffafa185899119f3eaf0f2a41cd478e833bf3"
+  },
+  "source_changed_during_run": false
+}

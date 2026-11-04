@@ -1,0 +1,3153 @@
+{
+  "claim": "Observed current-error recovery in this synthetic fixture only; all requested seeds retained.",
+  "comparison": {
+    "definition": "fixed-support final MSE minus rewiring final MSE (positive favors rewiring)",
+    "equal_error_seeds": 0,
+    "mean_difference": 0.48949814836184186,
+    "per_seed": [
+      {
+        "difference": 0.14497855305671692,
+        "seed": 0
+      },
+      {
+        "difference": 0.792287141084671,
+        "seed": 1
+      },
+      {
+        "difference": 0.5312287509441376,
+        "seed": 2
+      }
+    ],
+    "rewiring_higher_error_seeds": 0,
+    "rewiring_lower_error_seeds": 3
+  },
+  "results": [
+    {
+      "branches": {
+        "disrupted_no_rewire": {
+          "allow_rewire": false,
+          "error_reduction": 1.2057448029518127,
+          "final_active_indices": [
+            0,
+            1,
+            2,
+            6,
+            9,
+            10,
+            13,
+            15,
+            16,
+            17,
+            21,
+            23
+          ],
+          "final_bucket_active": [
+            6,
+            6
+          ],
+          "final_edge_age": [
+            80,
+            90,
+            90,
+            0,
+            0,
+            0,
+            80,
+            0,
+            0,
+            180,
+            80,
+            0,
+            0,
+            80,
+            0,
+            80,
+            80,
+            80,
+            0,
+            0,
+            0,
+            180,
+            0,
+            80
+          ],
+          "final_error": 0.49482399225234985,
+          "final_state_sha256": "61c444cc5397343527afa8b242d31fa0d4c02be4d53d06a9efbd6888e682bd35",
+          "gradient_updates": 160,
+          "immediate_error": 1.7005687952041626,
+          "initial_active_indices": [
+            0,
+            1,
+            2,
+            6,
+            9,
+            10,
+            13,
+            15,
+            16,
+            17,
+            21,
+            23
+          ],
+          "initial_bucket_active": [
+            6,
+            6
+          ],
+          "initial_edge_age": [
+            0,
+            10,
+            10,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            100,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            100,
+            0,
+            0
+          ],
+          "intervention": {
+            "fraction": 0.5,
+            "grown": [
+              6,
+              10,
+              0,
+              16,
+              17,
+              23
+            ],
+            "growth_init": "zero",
+            "intervention": true,
+            "pruned": [
+              7,
+              5,
+              3,
+              19,
+              14,
+              12
+            ],
+            "seed": 3678324062,
+            "swaps": 6,
+            "update": 80
+          },
+          "learned_swaps": 0,
+          "max_dormant_raw_gradient": 0.0,
+          "newborn_max_abs_weight": 0.0,
+          "support_events": [],
+          "weights": [
+            0.01674252562224865,
+            -0.9351640939712524,
+            0.009790345095098019,
+            0.0,
+            -0.03051372803747654,
+            0.0,
+            -0.7999064922332764,
+            0.9915791153907776,
+            0.010530930012464523,
+            0.010124378837645054,
+            1.0130586624145508,
+            -0.10000000149011612,
+            0.5680491924285889,
+            -0.9095671772956848,
+            -0.5606828331947327,
+            -0.0005944871809333563,
+            0.6876968741416931,
+            0.0023189042694866657,
+            0.029114289209246635,
+            0.9942072033882141,
+            -0.022375602275133133,
+            -0.02744048461318016,
+            -0.01529370341449976,
+            0.07226947695016861
+          ]
+        },
+        "disrupted_rewire": {
+          "allow_rewire": true,
+          "error_reduction": 1.3507233560085297,
+          "final_active_indices": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            10,
+            13,
+            15,
+            16,
+            18,
+            22,
+            23
+          ],
+          "final_bucket_active": [
+            6,
+            6
+          ],
+          "final_edge_age": [
+            0,
+            0,
+            0,
+            10,
+            10,
+            0,
+            80,
+            0,
+            0,
+            0,
+            80,
+            0,
+            0,
+            30,
+            0,
+            10,
+            10,
+            0,
+            0,
+            0,
+            0,
+            0,
+            70,
+            0
+          ],
+          "final_error": 0.34984543919563293,
+          "final_state_sha256": "b4f8fc7bfbaf220ef1d8126c2824fbcbbb50f962c598dc7078598a03e49c0f8f",
+          "gradient_updates": 160,
+          "immediate_error": 1.7005687952041626,
+          "initial_active_indices": [
+            0,
+            1,
+            2,
+            6,
+            9,
+            10,
+            13,
+            15,
+            16,
+            17,
+            21,
+            23
+          ],
+          "initial_bucket_active": [
+            6,
+            6
+          ],
+          "initial_edge_age": [
+            0,
+            10,
+            10,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            100,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            100,
+            0,
+            0
+          ],
+          "intervention": {
+            "fraction": 0.5,
+            "grown": [
+              6,
+              10,
+              0,
+              16,
+              17,
+              23
+            ],
+            "growth_init": "zero",
+            "intervention": true,
+            "pruned": [
+              7,
+              5,
+              3,
+              19,
+              14,
+              12
+            ],
+            "seed": 3678324062,
+            "swaps": 6,
+            "update": 80
+          },
+          "learned_swaps": 31,
+          "max_dormant_raw_gradient": 0.0,
+          "newborn_max_abs_weight": 0.0,
+          "support_events": [
+            {
+              "eligible_active": 4,
+              "grown": [
+                4,
+                3,
+                22
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 8,
+              "pruned": [
+                2,
+                9,
+                21
+              ],
+              "selection_score_mean": 0.19543778896331787,
+              "step": 10,
+              "swaps": 3,
+              "update": 90
+            },
+            {
+              "eligible_active": 9,
+              "grown": [
+                2,
+                9,
+                18,
+                21
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 3,
+              "pruned": [
+                0,
+                1,
+                15,
+                17
+              ],
+              "selection_score_mean": 0.1561058722436428,
+              "step": 20,
+              "swaps": 4,
+              "update": 100
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                1,
+                0,
+                19,
+                20
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                3,
+                4,
+                23,
+                16
+              ],
+              "selection_score_mean": 0.10432100063189864,
+              "step": 30,
+              "swaps": 4,
+              "update": 110
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                4,
+                3,
+                16,
+                15
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                9,
+                2,
+                21,
+                13
+              ],
+              "selection_score_mean": 0.151072446256876,
+              "step": 40,
+              "swaps": 4,
+              "update": 120
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                2,
+                5,
+                13,
+                12
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                0,
+                1,
+                20,
+                19
+              ],
+              "selection_score_mean": 0.11579888965934515,
+              "step": 50,
+              "swaps": 4,
+              "update": 130
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                1,
+                0,
+                14,
+                17
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                3,
+                4,
+                15,
+                16
+              ],
+              "selection_score_mean": 0.11504372023046017,
+              "step": 60,
+              "swaps": 4,
+              "update": 140
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                4,
+                3,
+                16,
+                15
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                2,
+                5,
+                12,
+                18
+              ],
+              "selection_score_mean": 0.15092243999242783,
+              "step": 70,
+              "swaps": 4,
+              "update": 150
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                2,
+                5,
+                18,
+                23
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                0,
+                1,
+                17,
+                14
+              ],
+              "selection_score_mean": 0.08814621297642589,
+              "step": 80,
+              "swaps": 4,
+              "update": 160
+            }
+          ],
+          "weights": [
+            -0.03400449827313423,
+            -1.2123746871948242,
+            0.0,
+            0.11511719971895218,
+            0.7521294355392456,
+            0.0,
+            -0.8005456924438477,
+            0.9915791153907776,
+            0.010530930012464523,
+            -0.0024879351258277893,
+            1.0136311054229736,
+            -0.10000000149011612,
+            -0.03837041184306145,
+            -0.9347313046455383,
+            0.0571557879447937,
+            0.016227517277002335,
+            0.7317151427268982,
+            0.00769294798374176,
+            0.0,
+            -0.014749383553862572,
+            0.000422455370426178,
+            0.021424999460577965,
+            1.020408034324646,
+            0.0
+          ]
+        },
+        "sham": {
+          "allow_rewire": true,
+          "error_reduction": 2.00412455201149,
+          "final_active_indices": [
+            1,
+            3,
+            4,
+            5,
+            6,
+            10,
+            12,
+            13,
+            15,
+            16,
+            18,
+            22
+          ],
+          "final_bucket_active": [
+            6,
+            6
+          ],
+          "final_edge_age": [
+            0,
+            0,
+            0,
+            10,
+            0,
+            10,
+            70,
+            0,
+            0,
+            0,
+            70,
+            0,
+            0,
+            10,
+            0,
+            10,
+            0,
+            0,
+            70,
+            0,
+            0,
+            0,
+            70,
+            0
+          ],
+          "final_error": 0.3991158902645111,
+          "final_state_sha256": "c84723bf4e47437022dc5b3b6356a181015e6ca8c92748d0d8d552eda5d406ad",
+          "gradient_updates": 160,
+          "immediate_error": 2.403240442276001,
+          "initial_active_indices": [
+            1,
+            2,
+            3,
+            5,
+            7,
+            9,
+            12,
+            13,
+            14,
+            15,
+            19,
+            21
+          ],
+          "initial_bucket_active": [
+            6,
+            6
+          ],
+          "initial_edge_age": [
+            0,
+            10,
+            10,
+            0,
+            0,
+            0,
+            0,
+            100,
+            0,
+            100,
+            0,
+            0,
+            10,
+            0,
+            10,
+            0,
+            0,
+            0,
+            0,
+            70,
+            0,
+            100,
+            0,
+            0
+          ],
+          "intervention": null,
+          "learned_swaps": 32,
+          "max_dormant_raw_gradient": 0.0,
+          "newborn_max_abs_weight": 0.0,
+          "support_events": [
+            {
+              "eligible_active": 8,
+              "grown": [
+                10,
+                6,
+                22,
+                18
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                2,
+                1,
+                14,
+                12
+              ],
+              "selection_score_mean": 0.29610785841941833,
+              "step": 10,
+              "swaps": 4,
+              "update": 90
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                1,
+                4,
+                16,
+                12
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                3,
+                5,
+                15,
+                21
+              ],
+              "selection_score_mean": 0.2729085870087147,
+              "step": 20,
+              "swaps": 4,
+              "update": 100
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                2,
+                5,
+                14,
+                21
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                7,
+                9,
+                19,
+                13
+              ],
+              "selection_score_mean": 0.047665299847722054,
+              "step": 30,
+              "swaps": 4,
+              "update": 110
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                7,
+                9,
+                13,
+                19
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                4,
+                1,
+                12,
+                16
+              ],
+              "selection_score_mean": 0.1179943336173892,
+              "step": 40,
+              "swaps": 4,
+              "update": 120
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                1,
+                4,
+                16,
+                12
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                2,
+                5,
+                14,
+                21
+              ],
+              "selection_score_mean": 0.22519508004188538,
+              "step": 50,
+              "swaps": 4,
+              "update": 130
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                2,
+                0,
+                14,
+                17
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                9,
+                7,
+                19,
+                13
+              ],
+              "selection_score_mean": 0.038723383098840714,
+              "step": 60,
+              "swaps": 4,
+              "update": 140
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                3,
+                5,
+                13,
+                15
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                4,
+                1,
+                12,
+                16
+              ],
+              "selection_score_mean": 0.11462948704138398,
+              "step": 70,
+              "swaps": 4,
+              "update": 150
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                1,
+                4,
+                16,
+                12
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                0,
+                2,
+                17,
+                14
+              ],
+              "selection_score_mean": 0.23454636335372925,
+              "step": 80,
+              "swaps": 4,
+              "update": 160
+            }
+          ],
+          "weights": [
+            0.04994555190205574,
+            0.0,
+            -0.1541908085346222,
+            -0.06706063449382782,
+            0.0,
+            0.06785693764686584,
+            -0.8179939389228821,
+            0.02007792890071869,
+            0.010530930012464523,
+            -0.014547928236424923,
+            1.0045819282531738,
+            -0.10000000149011612,
+            0.0,
+            -0.7434762716293335,
+            -0.04844214394688606,
+            0.03203127533197403,
+            0.0,
+            -0.027082886546850204,
+            -0.8245111107826233,
+            0.008362310007214546,
+            -0.022375602275133133,
+            0.038128115236759186,
+            0.9970468878746033,
+            -0.03411322459578514
+          ]
+        }
+      },
+      "evaluation_data_sha256": "cc319e55880a456e792d3b1f5c69aa60c42670c7263067746211c2a5c2d09ed1",
+      "intervention_seed": 3678324062,
+      "recovery_data_sha256": "232a158f8f745c28a20574aeb536846fd164e53386c2e54461dd50cf3f6a8a40",
+      "seed": 0,
+      "source": {
+        "active_indices": [
+          1,
+          2,
+          3,
+          5,
+          7,
+          9,
+          12,
+          13,
+          14,
+          15,
+          19,
+          21
+        ],
+        "error_after_target_switch": 2.403240442276001,
+        "error_before_switch": 0.15924100577831268,
+        "error_before_training": 1.2355077266693115,
+        "gradient_positive_candidates": 24,
+        "gradient_updates": 80,
+        "max_dormant_raw_gradient": 0.0,
+        "support_events": [
+          {
+            "eligible_active": 12,
+            "grown": [
+              2,
+              10,
+              19,
+              12
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 0,
+            "pruned": [
+              5,
+              4,
+              23,
+              15
+            ],
+            "selection_score_mean": 0.19857707805931568,
+            "step": 10,
+            "swaps": 4,
+            "update": 10
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              6,
+              5,
+              20,
+              18
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              8,
+              0,
+              16,
+              13
+            ],
+            "selection_score_mean": 0.036735646426677704,
+            "step": 20,
+            "swaps": 4,
+            "update": 20
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              0,
+              4,
+              22,
+              23
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              10,
+              2,
+              14,
+              12
+            ],
+            "selection_score_mean": 0.09795360499992967,
+            "step": 30,
+            "swaps": 4,
+            "update": 30
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              2,
+              1,
+              12,
+              14
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              6,
+              5,
+              20,
+              18
+            ],
+            "selection_score_mean": 0.2116576014086604,
+            "step": 40,
+            "swaps": 4,
+            "update": 40
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              5,
+              3,
+              15,
+              13
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              4,
+              0,
+              22,
+              23
+            ],
+            "selection_score_mean": 0.034966751001775265,
+            "step": 50,
+            "swaps": 4,
+            "update": 50
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              0,
+              4,
+              16,
+              17
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              1,
+              2,
+              14,
+              12
+            ],
+            "selection_score_mean": 0.09295093407854438,
+            "step": 60,
+            "swaps": 4,
+            "update": 60
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              2,
+              1,
+              12,
+              14
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              5,
+              3,
+              15,
+              13
+            ],
+            "selection_score_mean": 0.20916347950696945,
+            "step": 70,
+            "swaps": 4,
+            "update": 70
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              5,
+              3,
+              15,
+              13
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              4,
+              0,
+              16,
+              17
+            ],
+            "selection_score_mean": 0.03427038388326764,
+            "step": 80,
+            "swaps": 4,
+            "update": 80
+          }
+        ],
+        "weights": [
+          0.9627609848976135,
+          0.030471932142972946,
+          -0.5255388021469116,
+          0.0,
+          -0.03051372803747654,
+          0.0,
+          0.002200326882302761,
+          0.9915791153907776,
+          0.010530930012464523,
+          -0.7091014981269836,
+          -0.030066825449466705,
+          -0.10000000149011612,
+          0.5680491924285889,
+          0.0,
+          -0.5606828331947327,
+          0.0,
+          -0.009832324460148811,
+          -0.02448936551809311,
+          0.029114289209246635,
+          0.9942072033882141,
+          -0.022375602275133133,
+          -0.7086676955223083,
+          -0.01529370341449976,
+          -0.03411322459578514
+        ]
+      },
+      "source_state_after_branches": "95976487e62bde6cdf45100122fa860276285c96b52e73a1e6d93faaa7bc3195",
+      "source_state_before_branches": "95976487e62bde6cdf45100122fa860276285c96b52e73a1e6d93faaa7bc3195",
+      "source_unchanged": true,
+      "training_data_sha256": "0a75705ecf3c0338bbd7296c4db84e6be79f6cb594221206d92b3d478ad5ee7c"
+    },
+    {
+      "branches": {
+        "disrupted_no_rewire": {
+          "allow_rewire": false,
+          "error_reduction": 1.15328848361969,
+          "final_active_indices": [
+            0,
+            3,
+            5,
+            6,
+            8,
+            9,
+            14,
+            15,
+            16,
+            19,
+            22,
+            23
+          ],
+          "final_bucket_active": [
+            6,
+            6
+          ],
+          "final_edge_age": [
+            180,
+            0,
+            0,
+            80,
+            0,
+            80,
+            80,
+            0,
+            90,
+            90,
+            0,
+            0,
+            0,
+            0,
+            90,
+            80,
+            80,
+            0,
+            0,
+            180,
+            0,
+            0,
+            80,
+            80
+          ],
+          "final_error": 0.8989471197128296,
+          "final_state_sha256": "746758ee6b53ed1f23ab0378caae5411e64ecafc4bea68fdd6eb9877edf1bc63",
+          "gradient_updates": 160,
+          "immediate_error": 2.0522356033325195,
+          "initial_active_indices": [
+            0,
+            3,
+            5,
+            6,
+            8,
+            9,
+            14,
+            15,
+            16,
+            19,
+            22,
+            23
+          ],
+          "initial_bucket_active": [
+            6,
+            6
+          ],
+          "initial_edge_age": [
+            100,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            10,
+            10,
+            0,
+            0,
+            0,
+            0,
+            10,
+            0,
+            0,
+            0,
+            0,
+            100,
+            0,
+            0,
+            0,
+            0
+          ],
+          "intervention": {
+            "fraction": 0.5,
+            "grown": [
+              5,
+              6,
+              3,
+              22,
+              23,
+              16
+            ],
+            "growth_init": "zero",
+            "intervention": true,
+            "pruned": [
+              7,
+              10,
+              2,
+              13,
+              12,
+              21
+            ],
+            "seed": 1163909307,
+            "swaps": 6,
+            "update": 80
+          },
+          "learned_swaps": 0,
+          "max_dormant_raw_gradient": 0.0,
+          "newborn_max_abs_weight": 0.0,
+          "support_events": [],
+          "weights": [
+            -0.03040287271142006,
+            -0.000470905564725399,
+            0.0,
+            -0.02663229964673519,
+            -0.05507495254278183,
+            -0.08270672708749771,
+            -0.836561918258667,
+            1.176493525505066,
+            0.016683779656887054,
+            0.02240932732820511,
+            0.0,
+            -0.04409109428524971,
+            0.5642688274383545,
+            0.0,
+            0.047492824494838715,
+            0.07563501596450806,
+            0.7293144464492798,
+            0.07106439769268036,
+            0.10000000149011612,
+            0.047669894993305206,
+            0.025073185563087463,
+            -0.708952784538269,
+            1.0339354276657104,
+            0.0539274588227272
+          ]
+        },
+        "disrupted_rewire": {
+          "allow_rewire": true,
+          "error_reduction": 1.945575624704361,
+          "final_active_indices": [
+            0,
+            1,
+            4,
+            5,
+            6,
+            10,
+            13,
+            16,
+            18,
+            20,
+            21,
+            22
+          ],
+          "final_bucket_active": [
+            6,
+            6
+          ],
+          "final_edge_age": [
+            0,
+            10,
+            0,
+            0,
+            0,
+            10,
+            80,
+            0,
+            0,
+            0,
+            70,
+            0,
+            0,
+            40,
+            0,
+            0,
+            10,
+            0,
+            10,
+            0,
+            0,
+            0,
+            80,
+            0
+          ],
+          "final_error": 0.10665997862815857,
+          "final_state_sha256": "8e027feebe8f5da14db7863ec25d58d0691b71e1d9c781a9adf6fee806481f76",
+          "gradient_updates": 160,
+          "immediate_error": 2.0522356033325195,
+          "initial_active_indices": [
+            0,
+            3,
+            5,
+            6,
+            8,
+            9,
+            14,
+            15,
+            16,
+            19,
+            22,
+            23
+          ],
+          "initial_bucket_active": [
+            6,
+            6
+          ],
+          "initial_edge_age": [
+            100,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            10,
+            10,
+            0,
+            0,
+            0,
+            0,
+            10,
+            0,
+            0,
+            0,
+            0,
+            100,
+            0,
+            0,
+            0,
+            0
+          ],
+          "intervention": {
+            "fraction": 0.5,
+            "grown": [
+              5,
+              6,
+              3,
+              22,
+              23,
+              16
+            ],
+            "growth_init": "zero",
+            "intervention": true,
+            "pruned": [
+              7,
+              10,
+              2,
+              13,
+              12,
+              21
+            ],
+            "seed": 1163909307,
+            "swaps": 6,
+            "update": 80
+          },
+          "learned_swaps": 32,
+          "max_dormant_raw_gradient": 0.0,
+          "newborn_max_abs_weight": 0.0,
+          "support_events": [
+            {
+              "eligible_active": 5,
+              "grown": [
+                10,
+                1,
+                13,
+                18
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 7,
+              "pruned": [
+                8,
+                0,
+                14,
+                19
+              ],
+              "selection_score_mean": 0.30438438802957535,
+              "step": 10,
+              "swaps": 4,
+              "update": 90
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                4,
+                0,
+                19,
+                14
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                3,
+                9,
+                15,
+                23
+              ],
+              "selection_score_mean": 0.15777019783854485,
+              "step": 20,
+              "swaps": 4,
+              "update": 100
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                9,
+                2,
+                12,
+                15
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                5,
+                1,
+                16,
+                13
+              ],
+              "selection_score_mean": 0.03961979364976287,
+              "step": 30,
+              "swaps": 4,
+              "update": 110
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                1,
+                5,
+                13,
+                16
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                0,
+                4,
+                19,
+                14
+              ],
+              "selection_score_mean": 0.25479438714683056,
+              "step": 40,
+              "swaps": 4,
+              "update": 120
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                4,
+                0,
+                14,
+                17
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                2,
+                9,
+                12,
+                15
+              ],
+              "selection_score_mean": 0.10036441590636969,
+              "step": 50,
+              "swaps": 4,
+              "update": 130
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                2,
+                3,
+                12,
+                15
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                5,
+                1,
+                16,
+                18
+              ],
+              "selection_score_mean": 0.026153256185352802,
+              "step": 60,
+              "swaps": 4,
+              "update": 140
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                1,
+                5,
+                18,
+                16
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                0,
+                4,
+                17,
+                14
+              ],
+              "selection_score_mean": 0.23393042478710413,
+              "step": 70,
+              "swaps": 4,
+              "update": 150
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                4,
+                0,
+                21,
+                20
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                2,
+                3,
+                12,
+                15
+              ],
+              "selection_score_mean": 0.09635817864909768,
+              "step": 80,
+              "swaps": 4,
+              "update": 160
+            }
+          ],
+          "weights": [
+            0.0,
+            -0.7841686010360718,
+            0.027158120647072792,
+            -0.0782671570777893,
+            0.0,
+            0.050660233944654465,
+            -0.7990342974662781,
+            1.176493525505066,
+            -0.06141200661659241,
+            -0.007032809313386679,
+            1.006118893623352,
+            -0.04409109428524971,
+            0.05657821148633957,
+            -0.8779696822166443,
+            -0.032763347029685974,
+            -0.0815979614853859,
+            0.7686079740524292,
+            0.01572830229997635,
+            -0.7687013745307922,
+            0.029843613505363464,
+            0.0,
+            0.0,
+            1.0183178186416626,
+            -0.08149835467338562
+          ]
+        },
+        "sham": {
+          "allow_rewire": true,
+          "error_reduction": 2.382947266101837,
+          "final_active_indices": [
+            1,
+            4,
+            5,
+            6,
+            8,
+            10,
+            13,
+            15,
+            16,
+            18,
+            21,
+            22
+          ],
+          "final_bucket_active": [
+            6,
+            6
+          ],
+          "final_edge_age": [
+            0,
+            30,
+            0,
+            0,
+            10,
+            10,
+            0,
+            0,
+            0,
+            0,
+            80,
+            0,
+            0,
+            40,
+            0,
+            0,
+            0,
+            0,
+            10,
+            0,
+            0,
+            10,
+            70,
+            0
+          ],
+          "final_error": 0.2802357077598572,
+          "final_state_sha256": "e00a618b7b99f55b121235d8dac5b6535916c185eed0024df63bccd859562231",
+          "gradient_updates": 160,
+          "immediate_error": 2.6631829738616943,
+          "initial_active_indices": [
+            0,
+            2,
+            7,
+            8,
+            9,
+            10,
+            12,
+            13,
+            14,
+            15,
+            19,
+            21
+          ],
+          "initial_bucket_active": [
+            6,
+            6
+          ],
+          "initial_edge_age": [
+            100,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            30,
+            10,
+            10,
+            0,
+            0,
+            10,
+            0,
+            10,
+            0,
+            0,
+            0,
+            0,
+            100,
+            0,
+            100,
+            0,
+            0
+          ],
+          "intervention": null,
+          "learned_swaps": 32,
+          "max_dormant_raw_gradient": 0.0,
+          "newborn_max_abs_weight": 0.0,
+          "support_events": [
+            {
+              "eligible_active": 8,
+              "grown": [
+                1,
+                4,
+                22,
+                18
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                8,
+                0,
+                14,
+                12
+              ],
+              "selection_score_mean": 0.29548898339271545,
+              "step": 10,
+              "swaps": 4,
+              "update": 90
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                6,
+                0,
+                16,
+                12
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                2,
+                9,
+                15,
+                21
+              ],
+              "selection_score_mean": 0.22388162836432457,
+              "step": 20,
+              "swaps": 4,
+              "update": 100
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                9,
+                8,
+                14,
+                21
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                7,
+                4,
+                19,
+                13
+              ],
+              "selection_score_mean": 0.05478741694241762,
+              "step": 30,
+              "swaps": 4,
+              "update": 110
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                4,
+                7,
+                13,
+                19
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                0,
+                1,
+                12,
+                16
+              ],
+              "selection_score_mean": 0.1777567369863391,
+              "step": 40,
+              "swaps": 4,
+              "update": 120
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                1,
+                0,
+                16,
+                15
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                9,
+                8,
+                14,
+                21
+              ],
+              "selection_score_mean": 0.17635887302458286,
+              "step": 50,
+              "swaps": 4,
+              "update": 130
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                3,
+                2,
+                14,
+                12
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                7,
+                4,
+                19,
+                18
+              ],
+              "selection_score_mean": 0.03483677236363292,
+              "step": 60,
+              "swaps": 4,
+              "update": 140
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                4,
+                5,
+                18,
+                21
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                0,
+                6,
+                15,
+                16
+              ],
+              "selection_score_mean": 0.16152085177600384,
+              "step": 70,
+              "swaps": 4,
+              "update": 150
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                6,
+                8,
+                16,
+                15
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                2,
+                3,
+                12,
+                14
+              ],
+              "selection_score_mean": 0.15117489360272884,
+              "step": 80,
+              "swaps": 4,
+              "update": 160
+            }
+          ],
+          "weights": [
+            -0.08485732972621918,
+            -0.9882515668869019,
+            0.011606866493821144,
+            0.10577094554901123,
+            0.7687172889709473,
+            0.11410731077194214,
+            0.0,
+            0.03556222841143608,
+            0.0,
+            -0.05728629603981972,
+            1.00347900390625,
+            -0.04409109428524971,
+            -0.042514290660619736,
+            -0.8737879991531372,
+            -0.08052365481853485,
+            0.0,
+            0.0,
+            0.07106439769268036,
+            -0.7677537202835083,
+            0.020876528695225716,
+            0.025073185563087463,
+            -0.07005177438259125,
+            1.004369854927063,
+            0.03577112779021263
+          ]
+        }
+      },
+      "evaluation_data_sha256": "aeed9c698cc7ea0af790d53448c67a870213411270fb2994739f95302de2346d",
+      "intervention_seed": 1163909307,
+      "recovery_data_sha256": "38453ad157e6bebffe1d4198985d3df64001a9b8257c04b64ca621f672a19122",
+      "seed": 1,
+      "source": {
+        "active_indices": [
+          0,
+          2,
+          7,
+          8,
+          9,
+          10,
+          12,
+          13,
+          14,
+          15,
+          19,
+          21
+        ],
+        "error_after_target_switch": 2.6631829738616943,
+        "error_before_switch": 0.10203526169061661,
+        "error_before_training": 1.361173152923584,
+        "gradient_positive_candidates": 24,
+        "gradient_updates": 80,
+        "max_dormant_raw_gradient": 0.0,
+        "support_events": [
+          {
+            "eligible_active": 12,
+            "grown": [
+              7,
+              9,
+              12,
+              14
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 0,
+            "pruned": [
+              8,
+              11,
+              13,
+              20
+            ],
+            "selection_score_mean": 0.2487422674894333,
+            "step": 10,
+            "swaps": 4,
+            "update": 10
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              2,
+              10,
+              15,
+              22
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              1,
+              6,
+              17,
+              23
+            ],
+            "selection_score_mean": 0.09393761027604342,
+            "step": 20,
+            "swaps": 4,
+            "update": 20
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              11,
+              6,
+              16,
+              17
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              4,
+              9,
+              14,
+              12
+            ],
+            "selection_score_mean": 0.02852375665679574,
+            "step": 30,
+            "swaps": 4,
+            "update": 30
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              9,
+              8,
+              12,
+              14
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              10,
+              7,
+              22,
+              15
+            ],
+            "selection_score_mean": 0.2051195790991187,
+            "step": 40,
+            "swaps": 4,
+            "update": 40
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              7,
+              10,
+              15,
+              13
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              11,
+              6,
+              16,
+              17
+            ],
+            "selection_score_mean": 0.1259208950214088,
+            "step": 50,
+            "swaps": 4,
+            "update": 50
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              6,
+              11,
+              17,
+              16
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              8,
+              9,
+              14,
+              12
+            ],
+            "selection_score_mean": 0.0383653468452394,
+            "step": 60,
+            "swaps": 4,
+            "update": 60
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              9,
+              8,
+              12,
+              14
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              10,
+              2,
+              15,
+              13
+            ],
+            "selection_score_mean": 0.21208559535443783,
+            "step": 70,
+            "swaps": 4,
+            "update": 70
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              2,
+              10,
+              15,
+              13
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              11,
+              6,
+              17,
+              16
+            ],
+            "selection_score_mean": 0.07539499644190073,
+            "step": 80,
+            "swaps": 4,
+            "update": 80
+          }
+        ],
+        "weights": [
+          0.821999192237854,
+          -0.000470905564725399,
+          0.0,
+          -0.10000000149011612,
+          -0.05507495254278183,
+          -0.10000000149011612,
+          -0.04438363388180733,
+          1.176493525505066,
+          0.05345166474580765,
+          -0.5667642951011658,
+          0.0,
+          -0.04409109428524971,
+          0.5642688274383545,
+          0.0,
+          -0.5408299565315247,
+          0.0,
+          -0.12807486951351166,
+          0.07106439769268036,
+          0.10000000149011612,
+          0.989879310131073,
+          0.025073185563087463,
+          -0.708952784538269,
+          -0.005917801521718502,
+          0.03577112779021263
+        ]
+      },
+      "source_state_after_branches": "84c5e85eec9e00fc3f813d131c61c5c7101b5c5c9d2b36b894a0a893ce5ff6c0",
+      "source_state_before_branches": "84c5e85eec9e00fc3f813d131c61c5c7101b5c5c9d2b36b894a0a893ce5ff6c0",
+      "source_unchanged": true,
+      "training_data_sha256": "daa67c5c0591f7f8da655fe93f40b18d83ecdb2cb80fe2fbde1be56e0f99d1a6"
+    },
+    {
+      "branches": {
+        "disrupted_no_rewire": {
+          "allow_rewire": false,
+          "error_reduction": 1.4399864673614502,
+          "final_active_indices": [
+            0,
+            3,
+            7,
+            9,
+            10,
+            11,
+            12,
+            13,
+            16,
+            17,
+            18,
+            19
+          ],
+          "final_bucket_active": [
+            6,
+            6
+          ],
+          "final_edge_age": [
+            80,
+            0,
+            0,
+            80,
+            0,
+            0,
+            0,
+            120,
+            0,
+            100,
+            80,
+            80,
+            90,
+            80,
+            0,
+            0,
+            80,
+            80,
+            80,
+            180,
+            0,
+            0,
+            0,
+            0
+          ],
+          "final_error": 0.8055179119110107,
+          "final_state_sha256": "1c62b823da7178fac2efbfef4d3f42d7ab30972957adbfa7e079f83dce2931d8",
+          "gradient_updates": 160,
+          "immediate_error": 2.245504379272461,
+          "initial_active_indices": [
+            0,
+            3,
+            7,
+            9,
+            10,
+            11,
+            12,
+            13,
+            16,
+            17,
+            18,
+            19
+          ],
+          "initial_bucket_active": [
+            6,
+            6
+          ],
+          "initial_edge_age": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            40,
+            0,
+            20,
+            0,
+            0,
+            10,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            100,
+            0,
+            0,
+            0,
+            0
+          ],
+          "intervention": {
+            "fraction": 0.5,
+            "grown": [
+              0,
+              10,
+              3,
+              17,
+              16,
+              18
+            ],
+            "growth_init": "zero",
+            "intervention": true,
+            "pruned": [
+              1,
+              8,
+              2,
+              14,
+              21,
+              15
+            ],
+            "seed": 1748025480,
+            "swaps": 6,
+            "update": 80
+          },
+          "learned_swaps": 0,
+          "max_dormant_raw_gradient": 0.0,
+          "newborn_max_abs_weight": 0.0,
+          "support_events": [],
+          "weights": [
+            -0.13832829892635345,
+            0.0,
+            -0.5574614405632019,
+            -0.010190870612859726,
+            0.10000000149011612,
+            0.10772573202848434,
+            0.02253950573503971,
+            -0.009656252339482307,
+            0.003437530482187867,
+            0.006153720431029797,
+            1.032483696937561,
+            0.00839708000421524,
+            -0.005368161480873823,
+            -0.9162248373031616,
+            -0.5232457518577576,
+            0.0,
+            0.6972876191139221,
+            -0.007731399964541197,
+            -0.8476603031158447,
+            0.002582808956503868,
+            0.01070461980998516,
+            -0.7051517367362976,
+            0.10000000149011612,
+            -0.00565326539799571
+          ]
+        },
+        "disrupted_rewire": {
+          "allow_rewire": true,
+          "error_reduction": 1.9712152183055878,
+          "final_active_indices": [
+            0,
+            1,
+            3,
+            4,
+            6,
+            10,
+            12,
+            13,
+            14,
+            15,
+            18,
+            22
+          ],
+          "final_bucket_active": [
+            6,
+            6
+          ],
+          "final_edge_age": [
+            0,
+            10,
+            0,
+            10,
+            0,
+            0,
+            70,
+            0,
+            0,
+            0,
+            80,
+            0,
+            0,
+            10,
+            0,
+            10,
+            0,
+            0,
+            80,
+            0,
+            0,
+            0,
+            70,
+            0
+          ],
+          "final_error": 0.27428916096687317,
+          "final_state_sha256": "cf8182a6a3193ba1c0d999fe4eed4504b9cdb4e755b166d919e12013563fd58a",
+          "gradient_updates": 160,
+          "immediate_error": 2.245504379272461,
+          "initial_active_indices": [
+            0,
+            3,
+            7,
+            9,
+            10,
+            11,
+            12,
+            13,
+            16,
+            17,
+            18,
+            19
+          ],
+          "initial_bucket_active": [
+            6,
+            6
+          ],
+          "initial_edge_age": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            40,
+            0,
+            20,
+            0,
+            0,
+            10,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            100,
+            0,
+            0,
+            0,
+            0
+          ],
+          "intervention": {
+            "fraction": 0.5,
+            "grown": [
+              0,
+              10,
+              3,
+              17,
+              16,
+              18
+            ],
+            "growth_init": "zero",
+            "intervention": true,
+            "pruned": [
+              1,
+              8,
+              2,
+              14,
+              21,
+              15
+            ],
+            "seed": 1748025480,
+            "swaps": 6,
+            "update": 80
+          },
+          "learned_swaps": 32,
+          "max_dormant_raw_gradient": 0.0,
+          "newborn_max_abs_weight": 0.0,
+          "support_events": [
+            {
+              "eligible_active": 4,
+              "grown": [
+                6,
+                1,
+                22,
+                14
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 8,
+              "pruned": [
+                9,
+                7,
+                12,
+                19
+              ],
+              "selection_score_mean": 0.2592604234814644,
+              "step": 10,
+              "swaps": 4,
+              "update": 90
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                4,
+                7,
+                19,
+                12
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                0,
+                3,
+                17,
+                16
+              ],
+              "selection_score_mean": 0.16420261561870575,
+              "step": 20,
+              "swaps": 4,
+              "update": 100
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                9,
+                2,
+                16,
+                17
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                11,
+                1,
+                14,
+                13
+              ],
+              "selection_score_mean": 0.09850903041660786,
+              "step": 30,
+              "swaps": 4,
+              "update": 110
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                1,
+                3,
+                13,
+                15
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                7,
+                4,
+                19,
+                12
+              ],
+              "selection_score_mean": 0.19710493460297585,
+              "step": 40,
+              "swaps": 4,
+              "update": 120
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                4,
+                0,
+                12,
+                14
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                9,
+                2,
+                17,
+                16
+              ],
+              "selection_score_mean": 0.10126013495028019,
+              "step": 50,
+              "swaps": 4,
+              "update": 130
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                2,
+                5,
+                16,
+                17
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                3,
+                1,
+                15,
+                13
+              ],
+              "selection_score_mean": 0.09283212851732969,
+              "step": 60,
+              "swaps": 4,
+              "update": 140
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                1,
+                3,
+                13,
+                15
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                0,
+                4,
+                14,
+                12
+              ],
+              "selection_score_mean": 0.20460831839591265,
+              "step": 70,
+              "swaps": 4,
+              "update": 150
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                4,
+                0,
+                12,
+                14
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                5,
+                2,
+                17,
+                16
+              ],
+              "selection_score_mean": 0.09895408060401678,
+              "step": 80,
+              "swaps": 4,
+              "update": 160
+            }
+          ],
+          "weights": [
+            0.0,
+            -0.7771244049072266,
+            -0.10453569144010544,
+            0.061991408467292786,
+            0.0,
+            -0.02983010560274124,
+            -0.8124278783798218,
+            0.014170007780194283,
+            0.003437530482187867,
+            0.018951592966914177,
+            1.0131635665893555,
+            0.0017159783747047186,
+            0.0,
+            -0.7603264451026917,
+            0.0,
+            -0.11639784276485443,
+            0.9213361144065857,
+            0.036240629851818085,
+            -0.7934439778327942,
+            0.007018291857093573,
+            0.01070461980998516,
+            -0.7051517367362976,
+            1.0139797925949097,
+            -0.00565326539799571
+          ]
+        },
+        "sham": {
+          "allow_rewire": true,
+          "error_reduction": 2.1562695801258087,
+          "final_active_indices": [
+            1,
+            4,
+            5,
+            6,
+            9,
+            10,
+            12,
+            13,
+            15,
+            16,
+            18,
+            22
+          ],
+          "final_bucket_active": [
+            6,
+            6
+          ],
+          "final_edge_age": [
+            0,
+            40,
+            0,
+            0,
+            0,
+            0,
+            10,
+            0,
+            0,
+            10,
+            70,
+            0,
+            10,
+            30,
+            0,
+            0,
+            10,
+            0,
+            0,
+            0,
+            0,
+            0,
+            70,
+            0
+          ],
+          "final_error": 0.3064403235912323,
+          "final_state_sha256": "473489360da70ed78f841c6c78d5ff689b8287ee304723664d3b6b5e70378c33",
+          "gradient_updates": 160,
+          "immediate_error": 2.462709903717041,
+          "initial_active_indices": [
+            1,
+            2,
+            7,
+            8,
+            9,
+            11,
+            12,
+            13,
+            14,
+            15,
+            19,
+            21
+          ],
+          "initial_bucket_active": [
+            6,
+            6
+          ],
+          "initial_edge_age": [
+            0,
+            0,
+            10,
+            0,
+            0,
+            0,
+            0,
+            40,
+            10,
+            20,
+            0,
+            0,
+            10,
+            0,
+            10,
+            0,
+            0,
+            0,
+            0,
+            100,
+            0,
+            100,
+            0,
+            0
+          ],
+          "intervention": null,
+          "learned_swaps": 32,
+          "max_dormant_raw_gradient": 0.0,
+          "newborn_max_abs_weight": 0.0,
+          "support_events": [
+            {
+              "eligible_active": 8,
+              "grown": [
+                10,
+                6,
+                22,
+                16
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                8,
+                2,
+                14,
+                21
+              ],
+              "selection_score_mean": 0.3208000957965851,
+              "step": 10,
+              "swaps": 4,
+              "update": 90
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                4,
+                2,
+                18,
+                21
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                9,
+                11,
+                15,
+                12
+              ],
+              "selection_score_mean": 0.2107752300798893,
+              "step": 20,
+              "swaps": 4,
+              "update": 100
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                9,
+                5,
+                12,
+                14
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                7,
+                1,
+                19,
+                16
+              ],
+              "selection_score_mean": 0.05298581859096885,
+              "step": 30,
+              "swaps": 4,
+              "update": 110
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                1,
+                7,
+                16,
+                19
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                2,
+                4,
+                21,
+                13
+              ],
+              "selection_score_mean": 0.17713765799999237,
+              "step": 40,
+              "swaps": 4,
+              "update": 120
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                4,
+                2,
+                13,
+                15
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                5,
+                9,
+                12,
+                14
+              ],
+              "selection_score_mean": 0.17237392999231815,
+              "step": 50,
+              "swaps": 4,
+              "update": 130
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                0,
+                3,
+                14,
+                17
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                7,
+                6,
+                19,
+                16
+              ],
+              "selection_score_mean": 0.03205316932871938,
+              "step": 60,
+              "swaps": 4,
+              "update": 140
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                6,
+                9,
+                16,
+                12
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                2,
+                4,
+                15,
+                18
+              ],
+              "selection_score_mean": 0.15633616037666798,
+              "step": 70,
+              "swaps": 4,
+              "update": 150
+            },
+            {
+              "eligible_active": 8,
+              "grown": [
+                4,
+                5,
+                18,
+                15
+              ],
+              "growth_init": "zero",
+              "growth_rule": "gradient",
+              "min_age": 20,
+              "protected_active": 4,
+              "pruned": [
+                3,
+                0,
+                14,
+                17
+              ],
+              "selection_score_mean": 0.153837522957474,
+              "step": 80,
+              "swaps": 4,
+              "update": 160
+            }
+          ],
+          "weights": [
+            -0.1651628613471985,
+            -0.8175931572914124,
+            -0.05572083592414856,
+            0.14025427401065826,
+            0.0,
+            0.0,
+            -0.779818594455719,
+            -0.005042836535722017,
+            0.05065317451953888,
+            -0.0025065913796424866,
+            1.0242674350738525,
+            0.015884187072515488,
+            -0.00010169669985771179,
+            -1.0201823711395264,
+            0.02549571730196476,
+            0.0,
+            0.7465736269950867,
+            0.0789944976568222,
+            0.0,
+            0.006635772064328194,
+            0.01070461980998516,
+            -0.02287355624139309,
+            1.012101650238037,
+            -0.00565326539799571
+          ]
+        }
+      },
+      "evaluation_data_sha256": "1cefbac309daa59535a67bb2433e2a26547213211163a7ec590f7c2f780cd410",
+      "intervention_seed": 1748025480,
+      "recovery_data_sha256": "9598c707bec021bd7478b7329697b2d5ed8c3f61e30dda23aa6a562736eb4b00",
+      "seed": 2,
+      "source": {
+        "active_indices": [
+          1,
+          2,
+          7,
+          8,
+          9,
+          11,
+          12,
+          13,
+          14,
+          15,
+          19,
+          21
+        ],
+        "error_after_target_switch": 2.462709903717041,
+        "error_before_switch": 0.17399552464485168,
+        "error_before_training": 1.1141958236694336,
+        "gradient_positive_candidates": 24,
+        "gradient_updates": 80,
+        "max_dormant_raw_gradient": 0.0,
+        "support_events": [
+          {
+            "eligible_active": 12,
+            "grown": [
+              7,
+              8,
+              12,
+              14
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 0,
+            "pruned": [
+              3,
+              5,
+              13,
+              23
+            ],
+            "selection_score_mean": 0.20732262637466192,
+            "step": 10,
+            "swaps": 4,
+            "update": 10
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              11,
+              6,
+              13,
+              16
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              10,
+              2,
+              20,
+              18
+            ],
+            "selection_score_mean": 0.04516474436968565,
+            "step": 20,
+            "swaps": 4,
+            "update": 20
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              2,
+              10,
+              20,
+              17
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              8,
+              7,
+              14,
+              12
+            ],
+            "selection_score_mean": 0.075550208799541,
+            "step": 30,
+            "swaps": 4,
+            "update": 30
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              7,
+              8,
+              12,
+              14
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              6,
+              11,
+              16,
+              13
+            ],
+            "selection_score_mean": 0.2544717201963067,
+            "step": 40,
+            "swaps": 4,
+            "update": 40
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              11,
+              6,
+              13,
+              15
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              10,
+              9,
+              17,
+              20
+            ],
+            "selection_score_mean": 0.042187709361314774,
+            "step": 50,
+            "swaps": 4,
+            "update": 50
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              9,
+              10,
+              17,
+              16
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              8,
+              2,
+              14,
+              12
+            ],
+            "selection_score_mean": 0.08379817940294743,
+            "step": 60,
+            "swaps": 4,
+            "update": 60
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              2,
+              8,
+              12,
+              14
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              6,
+              11,
+              13,
+              15
+            ],
+            "selection_score_mean": 0.1952657368965447,
+            "step": 70,
+            "swaps": 4,
+            "update": 70
+          },
+          {
+            "eligible_active": 8,
+            "grown": [
+              11,
+              1,
+              13,
+              15
+            ],
+            "growth_init": "zero",
+            "growth_rule": "gradient",
+            "min_age": 20,
+            "protected_active": 4,
+            "pruned": [
+              10,
+              0,
+              17,
+              16
+            ],
+            "selection_score_mean": 0.02562944358214736,
+            "step": 80,
+            "swaps": 4,
+            "update": 80
+          }
+        ],
+        "weights": [
+          0.8248812556266785,
+          0.0,
+          -0.5574614405632019,
+          -0.014679400250315666,
+          0.10000000149011612,
+          0.10772573202848434,
+          0.02253950573503971,
+          1.12091064453125,
+          0.003437530482187867,
+          -0.8873736262321472,
+          0.02636554278433323,
+          0.0,
+          0.5607146620750427,
+          0.0,
+          -0.5232457518577576,
+          0.0,
+          -0.034324243664741516,
+          0.004071751609444618,
+          -0.07708775252103806,
+          0.9922771453857422,
+          0.01070461980998516,
+          -0.7051517367362976,
+          0.10000000149011612,
+          -0.00565326539799571
+        ]
+      },
+      "source_state_after_branches": "d024084d025590359fd28b3b4f237e560c2fed1e5a12a9e5957eb86ea4a79c0f",
+      "source_state_before_branches": "d024084d025590359fd28b3b4f237e560c2fed1e5a12a9e5957eb86ea4a79c0f",
+      "source_unchanged": true,
+      "training_data_sha256": "8af13a5b212bc3d2810e04395221c0feb2234276d7dbed072f59ade449312fed"
+    }
+  ]
+}

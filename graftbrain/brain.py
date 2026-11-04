@@ -6,19 +6,20 @@ Dynamics (rate model, one microstep):
     x   = W_conn r + W_graft r + b + P_s * I_sens
     r  <- (1 - a) r + a * relu(tanh(x)) + noise
 
-Biological & algorithmic innovations:
+Modeled neural mechanisms:
 1. **Homeostatic Activity Regulation**: intrinsic excitability (b_i) continuously adapts
    to keep the 12,000-neuron recurrent graph within a stable dynamic range (target r* ~ 0.12).
 2. **Central Complex (CX) Compass**: 16-wedge ring attractor path-integrates angular velocity
    and anchors to visual cues, providing a biological heading reference.
 3. **Mushroom Body (MB) Circuit**: sparse Kenyon Cells (top-k WTA) with plastic KC->MBON
    synapses modulated by Dopaminergic Neurons (DANs) on TD error.
-4. **PPO with Generalized Advantage Estimation (GAE)**: clipped surrogate objective with
-   multi-step lambda returns to stabilize policy learning through the recurrent graph.
+4. **One-pass actor-critic with Generalized Advantage Estimation (GAE)**: retained
+   action likelihoods and multi-step lambda returns through recurrent microsteps.
 5. **Intrinsic Curiosity (RND)**: exploration bonus from prediction error in sparse-reward tasks.
 """
 from __future__ import annotations
 
+import dataclasses
 import numpy as np
 import torch
 import torch.nn as nn
@@ -26,6 +27,7 @@ import torch.nn.functional as F
 
 from .graft import GraftedGraph
 from .neuro_modules import CentralComplexCompass, CuriosityRND, MushroomBody
+from .plasticity import GraftPlasticity, PlasticityConfig
 
 
 class GraftedBrain(nn.Module):
@@ -52,42 +54,47 @@ class GraftedBrain(nn.Module):
 
         def choose(roles, k):
             pool = np.flatnonzero(np.isin(g.role, roles))
-            if len(pool) < k:  # top up with central neurons
-                pool = np.concatenate([pool, rng.choice(np.flatnonzero(g.role == "central"), k - len(pool), replace=False)])
+            k = min(k, N)
+            if len(pool) < k:
+                remaining = np.setdiff1d(np.arange(N), pool)
+                pool = np.concatenate([pool, rng.choice(remaining, k - len(pool), replace=False)])
             # spread the ports evenly across all grafted connectomes
             per = [pool[g.origin[pool] == c] for c in range(len(g.names))]
             out, i = [], 0
             while len(out) < k:
                 p = per[i % len(per)]
-                if len(p):
-                    out.append(p[(i // len(per)) % len(p)])
+                pos = i // len(per)
+                if pos < len(p):
+                    out.append(p[pos])
                 i += 1
-            return torch.tensor(np.unique(out)[:k], dtype=torch.long)
+            return torch.tensor(sorted(out), dtype=torch.long)
 
         self.register_buffer("sensory_idx", choose(["sensory", "visual"], n_sensory))
         self.register_buffer("motor_idx", choose(["motor", "descending"], n_motor))
         self.register_buffer("probe_idx", torch.tensor(rng.choice(N, min(n_probe, N), replace=False), dtype=torch.long))
 
-    def graft_current(self, r):
-        return torch.zeros_like(r).index_add(0, self.graft_post, self.graft_w * r[self.graft_pre])
+    def graft_current(self, r, graft_weights=None):
+        weights = self.graft_w if graft_weights is None else graft_weights
+        return torch.zeros_like(r).index_add(0, self.graft_post, weights * r[self.graft_pre])
 
-    def forward(self, i_sens: torch.Tensor):
+    def forward(self, i_sens: torch.Tensor, graft_weights=None, adapt=True, advance=True):
         r = self.r.detach().clone()
         drive = torch.zeros(self.n).index_add(0, self.sensory_idx, i_sens)
         for _ in range(self.microsteps):
             x = (torch.zeros_like(r)
                  .index_add(0, self.base_post, self.base_w * r[self.base_pre])
-                 .index_add(0, self.graft_post, self.graft_w * r[self.graft_pre])) + self.bias + drive
+                 + self.graft_current(r, graft_weights)) + self.bias + drive
             r = (1 - self.leak) * r + self.leak * F.relu(torch.tanh(x))
             if self.noise:
                 r = r + self.noise * torch.randn_like(r)
             r = r.clamp(0.0, 1.0)
         with torch.no_grad():
-            self.elig.mul_(0.9).add_(r[self.graft_post].detach() * self.r[self.graft_pre])
-            self.r.copy_(r.detach())
-            # Homeostatic activity regulation (drift bias toward target firing rate)
-            self.activity_ema.mul_(0.99).add_(0.01 * r.detach())
-            self.bias.add_(0.0005 * (self.target_rate - self.activity_ema)).clamp_(-0.5, 0.5)
+            if adapt:
+                self.elig.mul_(0.9).add_(r[self.graft_post].detach() * self.r[self.graft_pre])
+                self.activity_ema.mul_(0.99).add_(0.01 * r.detach())
+                self.bias.add_(0.0005 * (self.target_rate - self.activity_ema)).clamp_(-0.5, 0.5)
+            if advance:
+                self.r.copy_(r.detach())
         return r
 
     @torch.no_grad()
@@ -134,10 +141,10 @@ class NeuralInterface(nn.Module):
 
 
 class Agent:
-    """Embodied connectomic agent with PPO, GAE, Central Complex compass, MB, and RND curiosity."""
+    """One-pass GAE actor-critic with optional adaptive graft support and routing."""
 
     def __init__(self, graph: GraftedGraph, obs_dim, cam_shape, act_dim, lr=3e-4, rollout=32,
-                 gamma=0.98, gae_lambda=0.95, ppo_clip=0.2, microsteps=4, seed=0):
+                 gamma=0.98, gae_lambda=0.95, ppo_clip=0.2, microsteps=4, seed=0, plasticity_config=None):
         torch.manual_seed(seed)
         self.brain = GraftedBrain(graph, microsteps=microsteps, seed=seed)
         b = self.brain
@@ -149,12 +156,17 @@ class Agent:
         self.iface = NeuralInterface(obs_dim, cam_shape, len(b.sensory_idx), len(b.motor_idx), len(b.probe_idx), act_dim)
         self.opt = torch.optim.Adam([{"params": self.iface.parameters()},
                                      {"params": [b.graft_w], "lr": lr * 0.3}], lr=lr)
+        self.plasticity = GraftPlasticity(graph, obs_dim, plasticity_config, seed=seed)
+        self.router_opt = (torch.optim.Adam(self.plasticity.router.parameters(),
+                                           lr=self.plasticity.config.router_lr)
+                           if self.plasticity.router is not None else None)
 
         self.rollout = rollout
         self.gamma = gamma
         self.gae_lambda = gae_lambda
         self.ppo_clip = ppo_clip
         self.buf = []
+        self.rewiring_enabled = True
         self.last_value = 0.0
         self.last_obs = np.zeros(obs_dim, dtype=np.float32)
         self.last_compass = torch.zeros(16)
@@ -162,12 +174,25 @@ class Agent:
 
         self.stats = {
             "updates": 0, "loss": 0.0, "td": 0.0, "curiosity": 0.0,
-            "graft_w_abs": float(b.graft_w.detach().abs().mean()),
-            "compass_bump": 0.0, "kc_sparsity": 0.0,
+            "graft_w_abs": float(b.graft_w.detach().abs().mean()) if b.graft_w.numel() else 0.0,
+            "compass_bump": 0.0, "kc_sparsity": 0.0, "transitions": 0,
         }
 
-    def act(self, obs: np.ndarray, cam: np.ndarray):
+    def act(self, obs: np.ndarray, cam: np.ndarray, training=True):
+        if not training:
+            with torch.no_grad():
+                mu, v, _ = self._forward(obs, cam, adapt=False)
+            return mu.clamp(-1, 1).numpy(), float(v)
         self.last_obs = obs
+        mu, v, gates = self._forward(obs, cam, adapt=True)
+        std = self.iface.log_std.exp()
+        dist = torch.distributions.Normal(mu, std)
+        a = dist.sample()
+        self.buf.append([dist.log_prob(a).sum(), v, dist.entropy().sum(), None, None,
+                         self.plasticity.regularization(gates)])
+        return a.clamp(-1, 1).numpy(), float(v.detach())
+
+    def _forward(self, obs, cam, adapt=True, advance=True):
         o = torch.tensor(obs, dtype=torch.float32)
         c = torch.tensor(cam, dtype=torch.float32)
 
@@ -178,28 +203,44 @@ class Agent:
         # 2. Update Mushroom Body sparse Kenyon Cells with current task cue (color + active)
         cue_offset = 33 * 4 + 8 + 9
         cue_tensor = torch.tensor(obs[cue_offset:cue_offset + 4], dtype=torch.float32)
-        mbon_act = self.mb(cue_tensor)
+        mbon_act = self.mb(cue_tensor, adapt=adapt)
 
-        self.last_compass = compass_act.detach()
-        self.last_mbon = mbon_act.detach()
-        self.stats["compass_bump"] = float(self.compass.bump_angle)
-        self.stats["kc_sparsity"] = float((self.mb.kc_act > 0).float().mean())
+        if advance:
+            self.last_compass = compass_act.detach()
+            self.last_mbon = mbon_act.detach()
+            self.stats["compass_bump"] = float(self.compass.bump_angle)
+            self.stats["kc_sparsity"] = float((self.mb.kc_act > 0).float().mean())
 
         # 3. Step connectome dynamics
         i_sens = self.iface.encode(o, c, compass_act, mbon_act)
-        r = self.brain(i_sens)
+        gates = self.plasticity.gates(o)
+        effective = self.plasticity.effective_weights(self.brain.graft_w, gates)
+        if adapt:
+            self.plasticity.capture_gradient(effective, gates)
+        r = self.brain(i_sens, effective, adapt=adapt, advance=advance)
+        if adapt:
+            self.plasticity.observe(r.detach())
+            self.brain.elig.mul_(self.plasticity.active_mask)
 
         # 4. Decode motor output and value
         mu, v = self.iface.decode(r[self.brain.motor_idx], r[self.brain.probe_idx], mbon_act)
-        std = self.iface.log_std.exp()
-        dist = torch.distributions.Normal(mu, std)
-        a = dist.sample()
+        return mu, v, gates
 
-        # Buffer: [log_prob, value, entropy, reward (placeholder), done (placeholder)]
-        self.buf.append([dist.log_prob(a).sum(), v, dist.entropy().sum(), None, None])
-        return a.clamp(-1, 1).numpy(), float(v.detach())
+    @torch.no_grad()
+    def _value(self, obs, cam):
+        angle = self.compass.bump_angle
+        gates = self.plasticity.last_gates.clone()
+        try:
+            with torch.random.fork_rng():
+                _, value, _ = self._forward(obs, cam, adapt=False, advance=False)
+            return float(value)
+        finally:
+            self.compass.bump_angle = angle
+            self.plasticity.last_gates.copy_(gates)
 
-    def feedback(self, reward: float, done: bool):
+    def feedback(self, reward: float, done: bool, next_obs=None, next_cam=None):
+        if not self.buf or self.buf[-1][3] is not None:
+            raise RuntimeError("feedback requires a preceding training action")
         # 1. Add intrinsic curiosity bonus
         o_t = torch.tensor(self.last_obs, dtype=torch.float32)
         curiosity_bonus = self.curiosity.compute_bonus(o_t, train=True)
@@ -209,28 +250,40 @@ class Agent:
         self.buf[-1][3] = r_total
         self.buf[-1][4] = done
 
-        # 2. TD error for 3-factor Hebbian graft plasticity and MB dopaminergic modulation
-        if len(self.buf) >= 2:
-            prev_v = float(self.buf[-2][1].detach())
-            next_v = float(self.buf[-1][1].detach())
-            td = self.buf[-2][3] + (0.0 if self.buf[-2][4] else self.gamma * next_v) - prev_v
-            self.brain.hebbian(td)
-            self.mb.dopaminergic_update(td)
-            self.stats["td"] = 0.95 * self.stats["td"] + 0.05 * td
+        current_v = float(self.buf[-1][1].detach())
+        bootstrap = (0.0 if done else self._value(next_obs, next_cam)
+                     if next_obs is not None and next_cam is not None else current_v)
+        td = r_total + self.gamma * bootstrap - current_v
+        self.brain.hebbian(td)
+        self.brain.heb.mul_(self.plasticity.active_mask)
+        self.mb.dopaminergic_update(td)
+        self.stats["td"] = 0.95 * self.stats["td"] + 0.05 * td
 
-        # 3. Multi-step PPO / GAE update
-        if done:
-            self._update(bootstrap=0.0)
-        elif len(self.buf) > self.rollout:
-            last = self.buf.pop()
-            self._update(bootstrap=float(last[1]))
+        # 3. Multi-step GAE actor-critic update
+        if done or len(self.buf) >= self.rollout:
+            self._update(bootstrap=bootstrap)
+
+    def flush(self, next_obs=None, next_cam=None):
+        if self.buf:
+            if self.buf[-1][3] is None:
+                raise RuntimeError("cannot flush an action before feedback")
+            bootstrap = (self._value(next_obs, next_cam) if next_obs is not None and next_cam is not None
+                         else float(self.buf[-1][1].detach()))
+            self._update(bootstrap)
+
+    def reset_episode(self):
+        self.brain.reset_state()
+        self.compass.reset()
+        self.mb.elig.zero_()
+        self.mb.kc_act.zero_()
+        self.last_compass.zero_()
+        self.last_mbon.zero_()
 
     def _update(self, bootstrap: float):
         n_steps = len(self.buf)
         rewards = [b[3] for b in self.buf]
         dones = [b[4] for b in self.buf]
-        values = [float(b[1]) for b in self.buf] + [bootstrap]
-        old_lps = torch.stack([b[0] for b in self.buf]).detach()
+        values = [float(b[1].detach()) for b in self.buf] + [bootstrap]
         old_vs = torch.stack([b[1] for b in self.buf])
         ents = torch.stack([b[2] for b in self.buf])
 
@@ -252,29 +305,38 @@ class Agent:
         else:
             adv_norm = advantages
 
-        # PPO clipped surrogate objective
+        # One-pass policy gradient: old-policy reevaluation/epochs are not performed.
         lps = torch.stack([b[0] for b in self.buf])
-        ratio = torch.exp(lps - old_lps)
-        surr1 = ratio * adv_norm
-        surr2 = torch.clamp(ratio, 1.0 - self.ppo_clip, 1.0 + self.ppo_clip) * adv_norm
-        policy_loss = -torch.min(surr1, surr2).mean()
+        policy_loss = -(lps * adv_norm).mean()
 
         value_loss = 0.5 * F.smooth_l1_loss(old_vs, returns)
         entropy_loss = -0.01 * ents.mean()
 
-        total_loss = policy_loss + value_loss + entropy_loss
+        route_loss = torch.stack([b[5] for b in self.buf]).mean()
+        total_loss = policy_loss + value_loss + entropy_loss + route_loss
 
         self.opt.zero_grad()
+        if self.router_opt is not None:
+            self.router_opt.zero_grad()
+        self.plasticity.begin_gradient_update()
         total_loss.backward()
+        self.plasticity.finish_gradient_update()
         nn.utils.clip_grad_norm_(list(self.iface.parameters()) + [self.brain.graft_w], 1.0)
         self.opt.step()
+        if self.router_opt is not None:
+            nn.utils.clip_grad_norm_(self.plasticity.router.parameters(), 1.0)
+            self.router_opt.step()
+        self.brain.heb.mul_(self.plasticity.active_mask)
         self.brain.apply_hebbian()
         self.buf.clear()
+        self.plasticity.after_update(self.brain.graft_w, self.opt, self.brain.elig, self.brain.heb,
+                                     allow_rewire=self.rewiring_enabled)
 
         self.stats.update(
             updates=self.stats["updates"] + 1,
-            loss=float(total_loss),
-            graft_w_abs=float(self.brain.graft_w.detach().abs().mean())
+            loss=float(total_loss.detach()),
+            transitions=self.stats["transitions"] + n_steps,
+            graft_w_abs=(float(self.brain.graft_w.detach().abs().mean()) if self.brain.graft_w.numel() else 0.0)
         )
 
     # ---- persistence ----
@@ -285,10 +347,35 @@ class Agent:
             "mb": self.mb.state_dict(),
             "curiosity": self.curiosity.state_dict(),
             "opt": self.opt.state_dict(),
+            "plasticity_config": dataclasses.asdict(self.plasticity.config),
+            "plasticity": self.plasticity.state_dict(),
+            "router_opt": self.router_opt.state_dict() if self.router_opt else None,
+            "rewiring_enabled": self.rewiring_enabled,
+            "compass_angle": self.compass.bump_angle,
+            "curiosity_opt": self.curiosity.opt.state_dict(),
             "stats": self.stats,
         }
 
     def load_state_dict(self, sd):
+        saved_cfg = PlasticityConfig(**sd.get("plasticity_config", {}))
+        if saved_cfg != self.plasticity.config:
+            raise ValueError("saved plasticity configuration differs; resume with saved settings or use --fresh")
+        if "plasticity" in sd:
+            self.plasticity.load_state_dict(sd["plasticity"])
+        # Older port selection could return fewer unique ports than requested.
+        # Rebuild only the interface shapes, then restore its saved parameters
+        # and optimizer, rather than changing the saved brain's ports.
+        port_names = ("sensory_idx", "motor_idx", "probe_idx")
+        if any(sd["brain"][k].shape != getattr(self.brain, k).shape for k in port_names):
+            obs_dim = self.iface.enc[0].in_features - 50
+            act_dim = self.iface.log_std.numel()
+            for key in port_names:
+                setattr(self.brain, key, torch.empty_like(sd["brain"][key]))
+            with torch.random.fork_rng(devices=[]):
+                self.iface = NeuralInterface(obs_dim, (2, 48, 64), len(self.brain.sensory_idx),
+                                             len(self.brain.motor_idx), len(self.brain.probe_idx), act_dim)
+            self.opt = torch.optim.Adam([{"params": self.iface.parameters()},
+                                         {"params": [self.brain.graft_w]}], lr=3e-4)
         self.brain.load_state_dict(sd["brain"], strict=False)
         self.iface.load_state_dict(sd["iface"], strict=False)
         if "mb" in sd:
@@ -296,5 +383,11 @@ class Agent:
         if "curiosity" in sd:
             self.curiosity.load_state_dict(sd["curiosity"], strict=False)
         self.opt.load_state_dict(sd["opt"])
+        if self.router_opt is not None and sd.get("router_opt") is not None:
+            self.router_opt.load_state_dict(sd["router_opt"])
+        if "curiosity_opt" in sd:
+            self.curiosity.opt.load_state_dict(sd["curiosity_opt"])
+        self.compass.bump_angle = sd.get("compass_angle", 0.0)
+        self.rewiring_enabled = sd.get("rewiring_enabled", True)
         self.stats.update(sd.get("stats", {}))
         self.buf.clear()

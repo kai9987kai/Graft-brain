@@ -15,6 +15,7 @@ import torch
 from . import connectomes as cx
 from .brain import Agent
 from .graft import GraftedGraph, build
+from .plasticity import PlasticityConfig
 from .senses import Webcam
 from .world import TASKS, World
 
@@ -47,7 +48,8 @@ def load_checkpoint(path):
 # ----------------------------------------------------------------------------- simulation
 class Simulation:
     def __init__(self, specs, state_path="state/graftbrain.pt", max_neurons=4000, webcam=False,
-                 autosave_s=60, task="auto", seed=0, microsteps=4, fresh=False):
+                 autosave_s=60, task="auto", seed=0, microsteps=4, fresh=False, plasticity_config=None,
+                 plasticity_overrides=None):
         self.state_path, self.autosave_s = state_path, autosave_s
         self.journal_path = os.path.splitext(state_path)[0] + "_journal.jsonl"
         self.cmds: queue.Queue = queue.Queue()
@@ -58,6 +60,19 @@ class Simulation:
         self.started = time.time()
 
         ckpt, used = (None, None) if fresh else load_checkpoint(state_path)
+        if ckpt is not None:
+            saved = ckpt["config"]
+            saved_plasticity = PlasticityConfig(**saved.get("plasticity", {}))
+            conflict = (any(getattr(saved_plasticity, key) != value for key, value in plasticity_overrides.items())
+                        if plasticity_overrides is not None else
+                        plasticity_config is not None and plasticity_config != saved_plasticity)
+            if conflict:
+                raise ValueError("checkpoint uses different graft settings; resume without overrides or use --fresh")
+            plasticity_config = saved_plasticity
+            seed = saved.get("seed", seed)
+            microsteps = saved.get("microsteps", microsteps)
+            max_neurons = saved.get("max_neurons", max_neurons)
+        plasticity_config = plasticity_config or PlasticityConfig()
         if ckpt is not None and ckpt["config"]["specs"] != list(specs):
             print(f"[persist] checkpoint was built from {ckpt['config']['specs']}, requested {list(specs)}; "
                   f"use --fresh or a different --state to start a new brain. Resuming the saved one.")
@@ -75,10 +90,12 @@ class Simulation:
         print(f"[graft] {g.n} neurons, {len(g.base_pre)} connectome edges, {len(g.graft_pre)} graft edges "
               f"across {len(g.sites)} sites")
 
-        self.config = {"specs": list(specs), "max_neurons": max_neurons, "seed": seed, "microsteps": microsteps}
+        self.config = {"specs": list(specs), "max_neurons": max_neurons, "seed": seed, "microsteps": microsteps,
+                       "plasticity": dataclasses.asdict(plasticity_config)}
         self.world = World(seed=seed, curriculum=task)
         self.cam = Webcam(enabled=webcam)
-        self.agent = Agent(g, World.obs_dim, (2, 48, 64), ACT_DIM, microsteps=microsteps, seed=seed)
+        self.agent = Agent(g, World.obs_dim, (2, 48, 64), ACT_DIM, microsteps=microsteps, seed=seed,
+                           plasticity_config=plasticity_config)
         if ckpt is not None:
             self.agent.load_state_dict(ckpt["agent"])
             self.total_steps = ckpt["total_steps"]
@@ -97,7 +114,7 @@ class Simulation:
     # ------------------------------------------------------------------ persistence
     def save(self, reason="autosave"):
         payload = {
-            "version": 1, "config": self.config, "graph": dataclasses.asdict(self.graph),
+            "version": 2, "config": self.config, "graph": dataclasses.asdict(self.graph),
             "agent": self.agent.state_dict(), "total_steps": self.total_steps, "saved_at": time.time(),
             "world": {"episode": self.world.episode, "task_i": self.world.task_i,
                       "history": {t: list(h) for t, h in self.world.history.items()}},
@@ -107,6 +124,7 @@ class Simulation:
         print(f"[persist] {reason}: saved step {self.total_steps} -> {self.state_path}")
 
     def _journal(self, info):
+        os.makedirs(os.path.dirname(os.path.abspath(self.journal_path)), exist_ok=True)
         with open(self.journal_path, "a", encoding="utf-8") as f:
             f.write(json.dumps({"time": time.time(), "step": self.total_steps, "episode": self.world.episode, **info}) + "\n")
 
@@ -130,18 +148,21 @@ class Simulation:
             self.world.curriculum = t
             self.agent.buf.clear()
             self.obs = self.world.reset(t if t in TASKS else None)
-        elif c == "reset_activity": self.agent.brain.reset_state()
+        elif c == "reset_activity":
+            self.agent.buf.clear()
+            self.agent.reset_episode()
 
     def step_once(self):
         cam, centroid = self.cam.read()
         self.world.webcam_target = centroid
         action, value = self.agent.act(self.obs, cam)
         self.obs, r, done, info = self.world.step(action)
-        self.agent.feedback(r, done)
+        self.agent.feedback(r, done, next_obs=self.obs, next_cam=cam)
         self.total_steps += 1
         if done:
             self.recent = (self.recent + [info])[-30:]
             self._journal(info)
+            self.agent.reset_episode()
             self.obs = self.world.reset()
         return value
 
@@ -178,14 +199,17 @@ class Simulation:
             img = np.interp(np.linspace(0, len(seg) - 1, k), np.arange(len(seg)), seg) if len(seg) else np.zeros(k)
             act.append({"name": name, "mean": float(seg.mean()) if len(seg) else 0.0,
                         "img": base64.b64encode((np.clip(img, 0, 1) * 255).astype(np.uint8).tobytes()).decode()})
-        gw = b.graft_w.detach().numpy()
+        gw = self.agent.plasticity.effective_weights(b.graft_w).detach().numpy()
         flow = np.abs(gw) * r[g.graft_pre]
         site_stats = []
+        plastic_sites = {s["id"]: s for s in self.agent.plasticity.site_stats()}
         for s in g.sites:
             m = g.graft_site == s["id"]
-            site_stats.append({**s, "w": float(np.abs(gw[m]).mean()), "flow": float(flow[m].mean())})
+            site_stats.append({**s, **plastic_sites[s["id"]],
+                               "w": float(np.abs(gw[m]).mean()), "flow": float(flow[m].mean())})
         snap = {
             "world": self.world.snapshot(), "brain": act, "sites": site_stats,
+            "plasticity": self.agent.plasticity.summary(),
             "compass": {
                 "bump": float(self.agent.compass.bump_angle),
                 "wedges": self.agent.last_compass.tolist(),
